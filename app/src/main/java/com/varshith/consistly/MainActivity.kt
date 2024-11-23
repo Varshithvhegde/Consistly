@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.varshith.consistly.data.ConsistlyDatabase
 import com.varshith.consistly.data.repositories.StreakRepository
@@ -36,9 +37,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         // Initialize Notification Services
         notificationService = NotificationService(this)
         streakReminderService = StreakReminderService(this)

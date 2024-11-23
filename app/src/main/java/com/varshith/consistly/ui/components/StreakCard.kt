@@ -96,14 +96,14 @@ fun StreakCard(
     ) {
         Column(
             modifier = Modifier
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.surfaceVariant,
-                            MaterialTheme.colorScheme.surface
-                        )
-                    )
-                )
+//                .background(
+//                    brush = Brush.verticalGradient(
+//                        colors = listOf(
+//                            MaterialTheme.colorScheme.surfaceVariant,
+//                            MaterialTheme.colorScheme.surface
+//                        )
+//                    )
+//                )
                 .padding(16.dp)
         ) {
             // Modern Header with Animated Elements
@@ -212,40 +212,40 @@ fun StreakCard(
                     }
                 }
             }
-            if (streak.dailyLogDates.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "Recent Activity",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                streak.dailyLogDates
-                    .sortedDescending()
-                    .take(3)
-                    .forEach { date ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.CheckCircle,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = date.format(dateFormatter),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-            }
+//            if (streak.dailyLogDates.isNotEmpty()) {
+//                Spacer(modifier = Modifier.height(16.dp))
+//                Text(
+//                    text = "Recent Activity",
+//                    style = MaterialTheme.typography.titleMedium,
+//                    fontWeight = FontWeight.SemiBold
+//                )
+//                Spacer(modifier = Modifier.height(8.dp))
+//
+//                streak.dailyLogDates
+//                    .sortedDescending()
+//                    .take(3)
+//                    .forEach { date ->
+//                        Row(
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .padding(vertical = 4.dp),
+//                            verticalAlignment = Alignment.CenterVertically
+//                        ) {
+//                            Icon(
+//                                imageVector = Icons.Rounded.CheckCircle,
+//                                contentDescription = null,
+//                                tint = MaterialTheme.colorScheme.primary,
+//                                modifier = Modifier.size(16.dp)
+//                            )
+//                            Spacer(modifier = Modifier.width(8.dp))
+//                            Text(
+//                                text = date.format(dateFormatter),
+//                                style = MaterialTheme.typography.bodyMedium,
+//                                color = MaterialTheme.colorScheme.onSurfaceVariant
+//                            )
+//                        }
+//                    }
+//            }
 
             // Expandable Content
             AnimatedVisibility(
@@ -292,41 +292,41 @@ fun StreakCard(
                         )
                     }
 
-                    // Recent Logs Section
-//                    if (streak.dailyLogDates.isNotEmpty()) {
-//                        Spacer(modifier = Modifier.height(16.dp))
-//                        Text(
-//                            text = "Recent Activity",
-//                            style = MaterialTheme.typography.titleMedium,
-//                            fontWeight = FontWeight.SemiBold
-//                        )
-//                        Spacer(modifier = Modifier.height(8.dp))
-//
-//                        streak.dailyLogDates
-//                            .sortedDescending()
-//                            .take(3)
-//                            .forEach { date ->
-//                                Row(
-//                                    modifier = Modifier
-//                                        .fillMaxWidth()
-//                                        .padding(vertical = 4.dp),
-//                                    verticalAlignment = Alignment.CenterVertically
-//                                ) {
-//                                    Icon(
-//                                        imageVector = Icons.Rounded.CheckCircle,
-//                                        contentDescription = null,
-//                                        tint = MaterialTheme.colorScheme.primary,
-//                                        modifier = Modifier.size(16.dp)
-//                                    )
-//                                    Spacer(modifier = Modifier.width(8.dp))
-//                                    Text(
-//                                        text = date.format(dateFormatter),
-//                                        style = MaterialTheme.typography.bodyMedium,
-//                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-//                                    )
-//                                }
-//                            }
-//                    }
+//                     Recent Logs Section
+                    if (streak.dailyLogDates.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text = "Recent Activity",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        streak.dailyLogDates
+                            .sortedDescending()
+                            .take(3)
+                            .forEach { date ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.CheckCircle,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = date.format(dateFormatter),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                    }
                 }
             }
 

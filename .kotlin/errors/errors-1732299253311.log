@@ -1,0 +1,423 @@
+kotlin version: 2.0.0
+error message: org.jetbrains.kotlin.backend.common.BackendException: Backend Internal error: Exception during IR lowering
+File being compiled: C:/Users/varsh/StudioProjects/Consistly/app/src/main/java/com/varshith/consistly/ui/components/StreakCard.kt
+The root cause java.lang.RuntimeException was thrown at: org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate(FunctionCodegen.kt:50)
+	at org.jetbrains.kotlin.backend.common.CodegenUtil.reportBackendException(CodegenUtil.kt:253)
+	at org.jetbrains.kotlin.backend.common.CodegenUtil.reportBackendException$default(CodegenUtil.kt:236)
+	at org.jetbrains.kotlin.backend.common.phaser.PerformByIrFilePhase.invokeSequential(performByIrFile.kt:65)
+	at org.jetbrains.kotlin.backend.common.phaser.PerformByIrFilePhase.invoke(performByIrFile.kt:52)
+	at org.jetbrains.kotlin.backend.common.phaser.PerformByIrFilePhase.invoke(performByIrFile.kt:38)
+	at org.jetbrains.kotlin.backend.common.phaser.NamedCompilerPhase.phaseBody(CompilerPhase.kt:166)
+	at org.jetbrains.kotlin.backend.common.phaser.AbstractNamedCompilerPhase.invoke(CompilerPhase.kt:113)
+	at org.jetbrains.kotlin.backend.common.phaser.CompositePhase.invoke(PhaseBuilders.kt:29)
+	at org.jetbrains.kotlin.backend.common.phaser.CompositePhase.invoke(PhaseBuilders.kt:16)
+	at org.jetbrains.kotlin.backend.common.phaser.NamedCompilerPhase.phaseBody(CompilerPhase.kt:166)
+	at org.jetbrains.kotlin.backend.common.phaser.AbstractNamedCompilerPhase.invoke(CompilerPhase.kt:113)
+	at org.jetbrains.kotlin.backend.common.phaser.CompilerPhaseKt.invokeToplevel(CompilerPhase.kt:62)
+	at org.jetbrains.kotlin.backend.jvm.JvmIrCodegenFactory.invokeCodegen(JvmIrCodegenFactory.kt:371)
+	at org.jetbrains.kotlin.codegen.CodegenFactory.generateModule(CodegenFactory.kt:47)
+	at org.jetbrains.kotlin.backend.jvm.JvmIrCodegenFactory.generateModuleInFrontendIRMode(JvmIrCodegenFactory.kt:433)
+	at org.jetbrains.kotlin.cli.jvm.compiler.pipeline.JvmCompilerPipelineKt.generateCodeFromIr(jvmCompilerPipeline.kt:241)
+	at org.jetbrains.kotlin.cli.jvm.compiler.pipeline.JvmCompilerPipelineKt.compileModulesUsingFrontendIrAndLightTree(jvmCompilerPipeline.kt:140)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecute(K2JVMCompiler.kt:155)
+	at org.jetbrains.kotlin.cli.jvm.K2JVMCompiler.doExecute(K2JVMCompiler.kt:50)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:104)
+	at org.jetbrains.kotlin.cli.common.CLICompiler.execImpl(CLICompiler.kt:48)
+	at org.jetbrains.kotlin.cli.common.CLITool.exec(CLITool.kt:101)
+	at org.jetbrains.kotlin.incremental.IncrementalJvmCompilerRunner.runCompiler(IncrementalJvmCompilerRunner.kt:453)
+	at org.jetbrains.kotlin.incremental.IncrementalJvmCompilerRunner.runCompiler(IncrementalJvmCompilerRunner.kt:62)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.doCompile(IncrementalCompilerRunner.kt:506)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compileImpl(IncrementalCompilerRunner.kt:423)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compileNonIncrementally(IncrementalCompilerRunner.kt:301)
+	at org.jetbrains.kotlin.incremental.IncrementalCompilerRunner.compile(IncrementalCompilerRunner.kt:129)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.execIncrementalCompiler(CompileServiceImpl.kt:676)
+	at org.jetbrains.kotlin.daemon.CompileServiceImplBase.access$execIncrementalCompiler(CompileServiceImpl.kt:92)
+	at org.jetbrains.kotlin.daemon.CompileServiceImpl.compile(CompileServiceImpl.kt:1661)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
+	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
+	at java.rmi/sun.rmi.server.UnicastServerRef.dispatch(Unknown Source)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Unknown Source)
+	at java.rmi/sun.rmi.transport.Transport$1.run(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.rmi/sun.rmi.transport.Transport.serviceCall(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport.handleMessages(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run0(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.lambda$run$0(Unknown Source)
+	at java.base/java.security.AccessController.doPrivileged(Unknown Source)
+	at java.rmi/sun.rmi.transport.tcp.TCPTransport$ConnectionHandler.run(Unknown Source)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(Unknown Source)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(Unknown Source)
+	at java.base/java.lang.Thread.run(Unknown Source)
+Caused by: java.lang.RuntimeException: Exception while generating code for:
+FUN name:StreakCard visibility:public modality:FINAL <> (streak:com.varshith.consistly.data.models.StreakEntity, onLogDay:kotlin.Function0<kotlin.Unit>, onBreakStreak:kotlin.Function0<kotlin.Unit>, onCardClick:kotlin.Function0<kotlin.Unit>, onDeleteStreak:kotlin.Function0<kotlin.Unit>, modifier:androidx.compose.ui.Modifier) returnType:kotlin.Unit
+  annotations:
+    OptIn(markerClass = [CLASS_REFERENCE 'CLASS IR_EXTERNAL_DECLARATION_STUB ANNOTATION_CLASS name:ExperimentalFoundationApi modality:OPEN visibility:public superTypes:[kotlin.Annotation]' type=kotlin.reflect.KClass<androidx.compose.foundation.ExperimentalFoundationApi>, CLASS_REFERENCE 'CLASS IR_EXTERNAL_DECLARATION_STUB ANNOTATION_CLASS name:ExperimentalMaterial3Api modality:OPEN visibility:public superTypes:[kotlin.Annotation]' type=kotlin.reflect.KClass<androidx.compose.material3.ExperimentalMaterial3Api>])
+    Composable
+  VALUE_PARAMETER name:streak index:0 type:com.varshith.consistly.data.models.StreakEntity
+  VALUE_PARAMETER name:onLogDay index:1 type:kotlin.Function0<kotlin.Unit>
+  VALUE_PARAMETER name:onBreakStreak index:2 type:kotlin.Function0<kotlin.Unit>
+  VALUE_PARAMETER name:onCardClick index:3 type:kotlin.Function0<kotlin.Unit>
+  VALUE_PARAMETER name:onDeleteStreak index:4 type:kotlin.Function0<kotlin.Unit>
+  VALUE_PARAMETER name:modifier index:5 type:androidx.compose.ui.Modifier
+    EXPRESSION_BODY
+      ERROR_EXPR 'Default Stub' type=androidx.compose.ui.Modifier
+  BLOCK_BODY
+    VAR PROPERTY_DELEGATE name:isExpanded$delegate type:androidx.compose.runtime.MutableState<kotlin.Boolean> [val]
+      CALL 'public final fun remember <T> (calculation: @[DisallowComposableCalls] kotlin.Function0<T of androidx.compose.runtime.ComposablesKt.remember>): T of androidx.compose.runtime.ComposablesKt.remember [inline] declared in androidx.compose.runtime.ComposablesKt' type=androidx.compose.runtime.MutableState<kotlin.Boolean> origin=null
+        <T>: androidx.compose.runtime.MutableState<kotlin.Boolean>
+        calculation: BLOCK type=kotlin.Function0<androidx.compose.runtime.MutableState<kotlin.Boolean>> origin=LAMBDA
+          COMPOSITE type=kotlin.Unit origin=null
+          FUNCTION_REFERENCE 'private final fun StreakCard$lambda$0 (): androidx.compose.runtime.MutableState<kotlin.Boolean> declared in com.varshith.consistly.ui.components.StreakCardKt' type=kotlin.Function0<androidx.compose.runtime.MutableState<kotlin.Boolean>> origin=INLINE_LAMBDA reflectionTarget=null
+    VAR name:hapticFeedback type:androidx.compose.ui.hapticfeedback.HapticFeedback [val]
+      CALL 'public final fun <get-current> (): T of androidx.compose.runtime.CompositionLocal [inline] declared in androidx.compose.runtime.CompositionLocal' type=androidx.compose.ui.hapticfeedback.HapticFeedback origin=GET_PROPERTY
+        $this: TYPE_OP type=androidx.compose.runtime.CompositionLocal<T of androidx.compose.runtime.CompositionLocal> origin=IMPLICIT_CAST typeOperand=androidx.compose.runtime.CompositionLocal<T of androidx.compose.runtime.CompositionLocal>
+          CALL 'public final fun <get-LocalHapticFeedback> (): androidx.compose.runtime.ProvidableCompositionLocal<androidx.compose.ui.hapticfeedback.HapticFeedback> declared in androidx.compose.ui.platform.CompositionLocalsKt' type=androidx.compose.runtime.ProvidableCompositionLocal<androidx.compose.ui.hapticfeedback.HapticFeedback> origin=GET_PROPERTY
+    VAR PROPERTY_DELEGATE name:showMenu$delegate type:androidx.compose.runtime.MutableState<kotlin.Boolean> [val]
+      CALL 'public final fun remember <T> (calculation: @[DisallowComposableCalls] kotlin.Function0<T of androidx.compose.runtime.ComposablesKt.remember>): T of androidx.compose.runtime.ComposablesKt.remember [inline] declared in androidx.compose.runtime.ComposablesKt' type=androidx.compose.runtime.MutableState<kotlin.Boolean> origin=null
+        <T>: androidx.compose.runtime.MutableState<kotlin.Boolean>
+        calculation: BLOCK type=kotlin.Function0<androidx.compose.runtime.MutableState<kotlin.Boolean>> origin=LAMBDA
+          COMPOSITE type=kotlin.Unit origin=null
+          FUNCTION_REFERENCE 'private final fun StreakCard$lambda$3 (): androidx.compose.runtime.MutableState<kotlin.Boolean> declared in com.varshith.consistly.ui.components.StreakCardKt' type=kotlin.Function0<androidx.compose.runtime.MutableState<kotlin.Boolean>> origin=INLINE_LAMBDA reflectionTarget=null
+    VAR PROPERTY_DELEGATE name:showDeleteDialog$delegate type:androidx.compose.runtime.MutableState<kotlin.Boolean> [val]
+      CALL 'public final fun remember <T> (calculation: @[DisallowComposableCalls] kotlin.Function0<T of androidx.compose.runtime.ComposablesKt.remember>): T of androidx.compose.runtime.ComposablesKt.remember [inline] declared in androidx.compose.runtime.ComposablesKt' type=androidx.compose.runtime.MutableState<kotlin.Boolean> origin=null
+        <T>: androidx.compose.runtime.MutableState<kotlin.Boolean>
+        calculation: BLOCK type=kotlin.Function0<androidx.compose.runtime.MutableState<kotlin.Boolean>> origin=LAMBDA
+          COMPOSITE type=kotlin.Unit origin=null
+          FUNCTION_REFERENCE 'private final fun StreakCard$lambda$6 (): androidx.compose.runtime.MutableState<kotlin.Boolean> declared in com.varshith.consistly.ui.components.StreakCardKt' type=kotlin.Function0<androidx.compose.runtime.MutableState<kotlin.Boolean>> origin=INLINE_LAMBDA reflectionTarget=null
+    VAR PROPERTY_DELEGATE name:cardHeight$delegate type:androidx.compose.runtime.State<kotlin.Float> [val]
+      CALL 'public final fun animateFloatAsState$default (targetValue: kotlin.Float, animationSpec: androidx.compose.animation.core.AnimationSpec<kotlin.Float>?, visibilityThreshold: kotlin.Float, label: kotlin.String?, finishedListener: kotlin.Function1<kotlin.Float, kotlin.Unit>?, $mask0: kotlin.Int, $handler: kotlin.Any?): androidx.compose.runtime.State<kotlin.Float> declared in androidx.compose.animation.core.AnimateAsStateKt' type=androidx.compose.runtime.State<kotlin.Float> origin=DEFAULT_DISPATCH_CALL
+        targetValue: WHEN type=kotlin.Float origin=IF
+          BRANCH
+            if: CALL 'private final fun StreakCard$lambda$1 ($isExpanded$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean>): kotlin.Boolean declared in com.varshith.consistly.ui.components.StreakCardKt' type=kotlin.Boolean origin=GET_LOCAL_PROPERTY
+              $isExpanded$delegate: GET_VAR 'val isExpanded$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean> [val] declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=androidx.compose.runtime.MutableState<kotlin.Boolean> origin=null
+            then: CONST Float type=kotlin.Float value=1.0
+          BRANCH
+            if: CONST Boolean type=kotlin.Boolean value=true
+            then: CONST Float type=kotlin.Float value=0.8
+        animationSpec: TYPE_OP type=androidx.compose.animation.core.SpringSpec<kotlin.Float> origin=IMPLICIT_CAST typeOperand=androidx.compose.animation.core.SpringSpec<kotlin.Float>
+          CALL 'public final fun spring$default <T> (dampingRatio: kotlin.Float, stiffness: kotlin.Float, visibilityThreshold: T of androidx.compose.animation.core.AnimationSpecKt.spring$default?, $mask0: kotlin.Int, $handler: kotlin.Any?): androidx.compose.animation.core.SpringSpec<T of androidx.compose.animation.core.AnimationSpecKt.spring$default> declared in androidx.compose.animation.core.AnimationSpecKt' type=androidx.compose.animation.core.SpringSpec<T of androidx.compose.animation.core.AnimationSpecKt.spring$default> origin=DEFAULT_DISPATCH_CALL
+            <T>: kotlin.Float
+            dampingRatio: CONST Float type=kotlin.Float value=0.5
+            stiffness: CONST Float type=kotlin.Float value=200.0
+            visibilityThreshold: COMPOSITE type=T of androidx.compose.animation.core.AnimationSpecKt.spring$default? origin=DEFAULT_VALUE
+              CONST Null type=kotlin.Any? value=null
+            $mask0: CONST Int type=kotlin.Int value=4
+            $handler: CONST Null type=kotlin.Any? value=null
+        visibilityThreshold: COMPOSITE type=kotlin.Float origin=DEFAULT_VALUE
+          CONST Float type=kotlin.Float value=0.0
+        label: COMPOSITE type=kotlin.String? origin=DEFAULT_VALUE
+          CONST Null type=kotlin.String? value=null
+        finishedListener: COMPOSITE type=kotlin.Function1<kotlin.Float, kotlin.Unit>? origin=DEFAULT_VALUE
+          CONST Null type=kotlin.Function1<kotlin.Float, kotlin.Unit>? value=null
+        $mask0: CONST Int type=kotlin.Int value=28
+        $handler: CONST Null type=kotlin.Any? value=null
+    VAR name:dateFormatter type:@[FlexibleNullability] java.time.format.DateTimeFormatter? [val]
+      CALL 'public final fun remember <T> (calculation: @[DisallowComposableCalls] kotlin.Function0<T of androidx.compose.runtime.ComposablesKt.remember>): T of androidx.compose.runtime.ComposablesKt.remember [inline] declared in androidx.compose.runtime.ComposablesKt' type=@[FlexibleNullability] java.time.format.DateTimeFormatter? origin=null
+        <T>: @[FlexibleNullability] java.time.format.DateTimeFormatter?
+        calculation: BLOCK type=kotlin.Function0<@[FlexibleNullability] java.time.format.DateTimeFormatter?> origin=LAMBDA
+          COMPOSITE type=kotlin.Unit origin=null
+          FUNCTION_REFERENCE 'private final fun StreakCard$lambda$10 (): @[FlexibleNullability] java.time.format.DateTimeFormatter? declared in com.varshith.consistly.ui.components.StreakCardKt' type=kotlin.Function0<@[FlexibleNullability] java.time.format.DateTimeFormatter?> origin=INLINE_LAMBDA reflectionTarget=null
+    CALL 'public final fun DeleteConfirmationDialog$default (visible: kotlin.Boolean, onDismiss: kotlin.Function0<kotlin.Unit>, onConfirm: kotlin.Function0<kotlin.Unit>, itemName: kotlin.String, title: kotlin.String?, message: kotlin.String?, confirmButtonText: kotlin.String?, dismissButtonText: kotlin.String?, $mask0: kotlin.Int, $handler: kotlin.Any?): kotlin.Unit declared in com.varshith.consistly.ui.components.DeleteConfirmationDialogKt' type=kotlin.Unit origin=DEFAULT_DISPATCH_CALL
+      visible: CALL 'private final fun StreakCard$lambda$7 ($showDeleteDialog$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean>): kotlin.Boolean declared in com.varshith.consistly.ui.components.StreakCardKt' type=kotlin.Boolean origin=GET_LOCAL_PROPERTY
+        $showDeleteDialog$delegate: GET_VAR 'val showDeleteDialog$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean> [val] declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=androidx.compose.runtime.MutableState<kotlin.Boolean> origin=null
+      onDismiss: BLOCK type=kotlin.Function0<kotlin.Unit> origin=LAMBDA
+        COMPOSITE type=kotlin.Unit origin=null
+        CALL 'public final fun <jvm-indy> <T> (dynamicCall: T of kotlin.jvm.internal.<jvm-indy>, bootstrapMethodHandle: kotlin.Any, vararg bootstrapMethodArguments: kotlin.Any): T of kotlin.jvm.internal.<jvm-indy> declared in kotlin.jvm.internal' type=kotlin.Function0<kotlin.Unit> origin=null
+          <T>: kotlin.Function0<kotlin.Unit>
+          dynamicCall: CALL 'public final fun invoke (p0: androidx.compose.runtime.MutableState<kotlin.Boolean>): kotlin.Function0<kotlin.Unit> declared in kotlin.jvm.internal.invokeDynamic' type=kotlin.Function0<kotlin.Unit> origin=null
+            p0: GET_VAR 'val showDeleteDialog$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean> [val] declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=androidx.compose.runtime.MutableState<kotlin.Boolean> origin=null
+          bootstrapMethodHandle: CALL 'public final fun <jvm-method-handle> (tag: kotlin.Int, owner: kotlin.String, name: kotlin.String, descriptor: kotlin.String, isInterface: kotlin.Boolean): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+            tag: CONST Int type=kotlin.Int value=6
+            owner: CONST String type=kotlin.String value="java/lang/invoke/LambdaMetafactory"
+            name: CONST String type=kotlin.String value="metafactory"
+            descriptor: CONST String type=kotlin.String value="(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"
+            isInterface: CONST Boolean type=kotlin.Boolean value=false
+          bootstrapMethodArguments: VARARG type=kotlin.Array<kotlin.Any> varargElementType=kotlin.Any
+            CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+              method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (): R of kotlin.Function0 [operator] declared in kotlin.Function0' type=kotlin.Any
+            RAW_FUNCTION_REFERENCE 'private final fun StreakCard$lambda$11 ($showDeleteDialog$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean>): kotlin.Unit? declared in com.varshith.consistly.ui.components.StreakCardKt' type=kotlin.Any
+            CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+              method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (): kotlin.Unit? [fake_override,operator] declared in kotlin.jvm.internal.invokeDynamic.<fake>' type=kotlin.Any
+      onConfirm: BLOCK type=kotlin.Function0<kotlin.Unit> origin=LAMBDA
+        COMPOSITE type=kotlin.Unit origin=null
+        CALL 'public final fun <jvm-indy> <T> (dynamicCall: T of kotlin.jvm.internal.<jvm-indy>, bootstrapMethodHandle: kotlin.Any, vararg bootstrapMethodArguments: kotlin.Any): T of kotlin.jvm.internal.<jvm-indy> declared in kotlin.jvm.internal' type=kotlin.Function0<kotlin.Unit> origin=null
+          <T>: kotlin.Function0<kotlin.Unit>
+          dynamicCall: CALL 'public final fun invoke (p0: kotlin.Function0<kotlin.Unit>, p1: androidx.compose.runtime.MutableState<kotlin.Boolean>): kotlin.Function0<kotlin.Unit> declared in kotlin.jvm.internal.invokeDynamic' type=kotlin.Function0<kotlin.Unit> origin=null
+            p0: GET_VAR 'onDeleteStreak: kotlin.Function0<kotlin.Unit> declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=kotlin.Function0<kotlin.Unit> origin=null
+            p1: GET_VAR 'val showDeleteDialog$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean> [val] declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=androidx.compose.runtime.MutableState<kotlin.Boolean> origin=null
+          bootstrapMethodHandle: CALL 'public final fun <jvm-method-handle> (tag: kotlin.Int, owner: kotlin.String, name: kotlin.String, descriptor: kotlin.String, isInterface: kotlin.Boolean): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+            tag: CONST Int type=kotlin.Int value=6
+            owner: CONST String type=kotlin.String value="java/lang/invoke/LambdaMetafactory"
+            name: CONST String type=kotlin.String value="metafactory"
+            descriptor: CONST String type=kotlin.String value="(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"
+            isInterface: CONST Boolean type=kotlin.Boolean value=false
+          bootstrapMethodArguments: VARARG type=kotlin.Array<kotlin.Any> varargElementType=kotlin.Any
+            CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+              method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (): R of kotlin.Function0 [operator] declared in kotlin.Function0' type=kotlin.Any
+            RAW_FUNCTION_REFERENCE 'private final fun StreakCard$lambda$12 ($onDeleteStreak: kotlin.Function0<kotlin.Unit>, $showDeleteDialog$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean>): kotlin.Unit? declared in com.varshith.consistly.ui.components.StreakCardKt' type=kotlin.Any
+            CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+              method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (): kotlin.Unit? [fake_override,operator] declared in kotlin.jvm.internal.invokeDynamic.<fake>' type=kotlin.Any
+      itemName: CALL 'public final fun <get-name> (): kotlin.String declared in com.varshith.consistly.data.models.StreakEntity' type=kotlin.String origin=GET_PROPERTY
+        $this: GET_VAR 'streak: com.varshith.consistly.data.models.StreakEntity declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=com.varshith.consistly.data.models.StreakEntity origin=null
+      title: COMPOSITE type=kotlin.String? origin=DEFAULT_VALUE
+        CONST Null type=kotlin.String? value=null
+      message: CALL 'public final fun toString (): kotlin.String declared in java.lang.StringBuilder' type=kotlin.String origin=null
+        $this: CALL 'public final fun append (value: kotlin.String?): java.lang.StringBuilder declared in java.lang.StringBuilder' type=java.lang.StringBuilder origin=null
+          $this: CALL 'public final fun append (value: kotlin.String?): java.lang.StringBuilder declared in java.lang.StringBuilder' type=java.lang.StringBuilder origin=null
+            $this: CALL 'public final fun append (value: kotlin.String?): java.lang.StringBuilder declared in java.lang.StringBuilder' type=java.lang.StringBuilder origin=null
+              $this: CONSTRUCTOR_CALL 'public constructor <init> () declared in java.lang.StringBuilder' type=java.lang.StringBuilder origin=null
+              value: CONST String type=kotlin.String value="Are you sure you want to delete '"
+            value: CALL 'public final fun <get-name> (): kotlin.String declared in com.varshith.consistly.data.models.StreakEntity' type=kotlin.String origin=GET_PROPERTY
+              $this: GET_VAR 'streak: com.varshith.consistly.data.models.StreakEntity declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=com.varshith.consistly.data.models.StreakEntity origin=null
+          value: CONST String type=kotlin.String value="' streak? This action cannot be undone."
+      confirmButtonText: COMPOSITE type=kotlin.String? origin=DEFAULT_VALUE
+        CONST Null type=kotlin.String? value=null
+      dismissButtonText: COMPOSITE type=kotlin.String? origin=DEFAULT_VALUE
+        CONST Null type=kotlin.String? value=null
+      $mask0: CONST Int type=kotlin.Int value=208
+      $handler: CONST Null type=kotlin.Any? value=null
+    CALL 'public final fun Card$default (modifier: androidx.compose.ui.Modifier?, shape: androidx.compose.ui.graphics.Shape?, colors: androidx.compose.material3.CardColors?, elevation: androidx.compose.material3.CardElevation?, border: androidx.compose.foundation.BorderStroke?, content: @[Composable] @[ExtensionFunctionType] kotlin.Function1<androidx.compose.foundation.layout.ColumnScope, kotlin.Unit>, $mask0: kotlin.Int, $handler: kotlin.Any?): kotlin.Unit declared in androidx.compose.material3.CardKt' type=kotlin.Unit origin=DEFAULT_DISPATCH_CALL
+      modifier: CALL 'public final fun semantics$default (mergeDescendants: kotlin.Boolean, properties: @[ExtensionFunctionType] kotlin.Function1<androidx.compose.ui.semantics.SemanticsPropertyReceiver, kotlin.Unit>, $mask0: kotlin.Int, $handler: kotlin.Any?): androidx.compose.ui.Modifier declared in androidx.compose.ui.semantics.SemanticsModifierKt' type=androidx.compose.ui.Modifier origin=DEFAULT_DISPATCH_CALL
+        $receiver: CALL 'public final fun combinedClickable-cJG_KMw$default (enabled: kotlin.Boolean, onClickLabel: kotlin.String?, role: androidx.compose.ui.semantics.Role?, onLongClickLabel: kotlin.String?, onLongClick: kotlin.Function0<kotlin.Unit>?, onDoubleClick: kotlin.Function0<kotlin.Unit>?, onClick: kotlin.Function0<kotlin.Unit>, $mask0: kotlin.Int, $handler: kotlin.Any?): androidx.compose.ui.Modifier declared in androidx.compose.foundation.ClickableKt' type=androidx.compose.ui.Modifier origin=DEFAULT_DISPATCH_CALL
+          $receiver: CALL 'public final fun clickable-XHw0xAI$default (enabled: kotlin.Boolean, onClickLabel: kotlin.String?, role: androidx.compose.ui.semantics.Role?, onClick: kotlin.Function0<kotlin.Unit>, $mask0: kotlin.Int, $handler: kotlin.Any?): androidx.compose.ui.Modifier declared in androidx.compose.foundation.ClickableKt' type=androidx.compose.ui.Modifier origin=DEFAULT_DISPATCH_CALL
+            $receiver: CALL 'public final fun shadow-s4CzXII$default (elevation: androidx.compose.ui.unit.Dp, shape: androidx.compose.ui.graphics.Shape?, clip: kotlin.Boolean, ambientColor: androidx.compose.ui.graphics.Color, spotColor: androidx.compose.ui.graphics.Color, $mask0: kotlin.Int, $handler: kotlin.Any?): androidx.compose.ui.Modifier declared in androidx.compose.ui.draw.ShadowKt' type=androidx.compose.ui.Modifier origin=DEFAULT_DISPATCH_CALL
+              $receiver: CALL 'public final fun clip (shape: androidx.compose.ui.graphics.Shape): androidx.compose.ui.Modifier declared in androidx.compose.ui.draw.ClipKt' type=androidx.compose.ui.Modifier origin=null
+                $receiver: CALL 'public final fun padding-VpY3zN4 (horizontal: androidx.compose.ui.unit.Dp, vertical: androidx.compose.ui.unit.Dp): androidx.compose.ui.Modifier declared in androidx.compose.foundation.layout.PaddingKt' type=androidx.compose.ui.Modifier origin=null
+                  $receiver: CALL 'public final fun fillMaxWidth$default (fraction: kotlin.Float, $mask0: kotlin.Int, $handler: kotlin.Any?): androidx.compose.ui.Modifier declared in androidx.compose.foundation.layout.SizeKt' type=androidx.compose.ui.Modifier origin=DEFAULT_DISPATCH_CALL
+                    $receiver: GET_VAR 'modifier: androidx.compose.ui.Modifier declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=androidx.compose.ui.Modifier origin=null
+                    fraction: COMPOSITE type=kotlin.Float origin=DEFAULT_VALUE
+                      CONST Float type=kotlin.Float value=0.0
+                    $mask0: CONST Int type=kotlin.Int value=1
+                    $handler: CONST Null type=kotlin.Any? value=null
+                  horizontal: CALL 'public final fun <get-dp> (): androidx.compose.ui.unit.Dp [inline] declared in androidx.compose.ui.unit.DpKt' type=androidx.compose.ui.unit.Dp origin=GET_PROPERTY
+                    $receiver: CONST Int type=kotlin.Int value=16
+                  vertical: CALL 'public final fun <get-dp> (): androidx.compose.ui.unit.Dp [inline] declared in androidx.compose.ui.unit.DpKt' type=androidx.compose.ui.unit.Dp origin=GET_PROPERTY
+                    $receiver: CONST Int type=kotlin.Int value=8
+                shape: CALL 'public final fun RoundedCornerShape-0680j_4 (size: androidx.compose.ui.unit.Dp): androidx.compose.foundation.shape.RoundedCornerShape declared in androidx.compose.foundation.shape.RoundedCornerShapeKt' type=androidx.compose.foundation.shape.RoundedCornerShape origin=null
+                  size: CALL 'public final fun <get-dp> (): androidx.compose.ui.unit.Dp [inline] declared in androidx.compose.ui.unit.DpKt' type=androidx.compose.ui.unit.Dp origin=GET_PROPERTY
+                    $receiver: CONST Int type=kotlin.Int value=24
+              elevation: WHEN type=androidx.compose.ui.unit.Dp origin=IF
+                BRANCH
+                  if: CALL 'private final fun StreakCard$lambda$1 ($isExpanded$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean>): kotlin.Boolean declared in com.varshith.consistly.ui.components.StreakCardKt' type=kotlin.Boolean origin=GET_LOCAL_PROPERTY
+                    $isExpanded$delegate: GET_VAR 'val isExpanded$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean> [val] declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=androidx.compose.runtime.MutableState<kotlin.Boolean> origin=null
+                  then: CALL 'public final fun <get-dp> (): androidx.compose.ui.unit.Dp [inline] declared in androidx.compose.ui.unit.DpKt' type=androidx.compose.ui.unit.Dp origin=GET_PROPERTY
+                    $receiver: CONST Int type=kotlin.Int value=16
+                BRANCH
+                  if: CONST Boolean type=kotlin.Boolean value=true
+                  then: CALL 'public final fun <get-dp> (): androidx.compose.ui.unit.Dp [inline] declared in androidx.compose.ui.unit.DpKt' type=androidx.compose.ui.unit.Dp origin=GET_PROPERTY
+                    $receiver: CONST Int type=kotlin.Int value=4
+              shape: CALL 'public final fun RoundedCornerShape-0680j_4 (size: androidx.compose.ui.unit.Dp): androidx.compose.foundation.shape.RoundedCornerShape declared in androidx.compose.foundation.shape.RoundedCornerShapeKt' type=androidx.compose.foundation.shape.RoundedCornerShape origin=null
+                size: CALL 'public final fun <get-dp> (): androidx.compose.ui.unit.Dp [inline] declared in androidx.compose.ui.unit.DpKt' type=androidx.compose.ui.unit.Dp origin=GET_PROPERTY
+                  $receiver: CONST Int type=kotlin.Int value=24
+              clip: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+                CONST Boolean type=kotlin.Boolean value=false
+              ambientColor: COMPOSITE type=androidx.compose.ui.graphics.Color origin=DEFAULT_VALUE
+                CALL 'public final fun <unsafe-coerce> <T, R> (v: T of kotlin.jvm.internal.<unsafe-coerce>): R of kotlin.jvm.internal.<unsafe-coerce> declared in kotlin.jvm.internal' type=androidx.compose.ui.graphics.Color origin=null
+                  <T>: kotlin.Long
+                  <R>: androidx.compose.ui.graphics.Color
+                  v: CONST Long type=kotlin.Long value=0
+              spotColor: WHEN type=androidx.compose.ui.graphics.Color origin=IF
+                BRANCH
+                  if: CALL 'public final fun <get-isActive> (): kotlin.Boolean declared in com.varshith.consistly.data.models.StreakEntity' type=kotlin.Boolean origin=GET_PROPERTY
+                    $this: GET_VAR 'streak: com.varshith.consistly.data.models.StreakEntity declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=com.varshith.consistly.data.models.StreakEntity origin=null
+                  then: CALL 'public final fun getPrimary-0d7_KjU (): androidx.compose.ui.graphics.Color declared in androidx.compose.material3.ColorScheme' type=androidx.compose.ui.graphics.Color origin=GET_PROPERTY
+                    $this: CALL 'public final fun <get-colorScheme> (): androidx.compose.material3.ColorScheme declared in androidx.compose.material3.MaterialTheme' type=androidx.compose.material3.ColorScheme origin=GET_PROPERTY
+                      $this: GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:androidx.compose.material3.MaterialTheme visibility:public [final,static]' type=androidx.compose.material3.MaterialTheme origin=null
+                BRANCH
+                  if: CONST Boolean type=kotlin.Boolean value=true
+                  then: CALL 'public final fun getError-0d7_KjU (): androidx.compose.ui.graphics.Color declared in androidx.compose.material3.ColorScheme' type=androidx.compose.ui.graphics.Color origin=GET_PROPERTY
+                    $this: CALL 'public final fun <get-colorScheme> (): androidx.compose.material3.ColorScheme declared in androidx.compose.material3.MaterialTheme' type=androidx.compose.material3.ColorScheme origin=GET_PROPERTY
+                      $this: GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:androidx.compose.material3.MaterialTheme visibility:public [final,static]' type=androidx.compose.material3.MaterialTheme origin=null
+              $mask0: CONST Int type=kotlin.Int value=12
+              $handler: CONST Null type=kotlin.Any? value=null
+            enabled: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+              CONST Boolean type=kotlin.Boolean value=false
+            onClickLabel: COMPOSITE type=kotlin.String? origin=DEFAULT_VALUE
+              CONST Null type=kotlin.String? value=null
+            role: COMPOSITE type=androidx.compose.ui.semantics.Role? origin=DEFAULT_VALUE
+              CONST Null type=androidx.compose.ui.semantics.Role? value=null
+            onClick: BLOCK type=kotlin.Function0<kotlin.Unit> origin=LAMBDA
+              COMPOSITE type=kotlin.Unit origin=null
+              CALL 'public final fun <jvm-indy> <T> (dynamicCall: T of kotlin.jvm.internal.<jvm-indy>, bootstrapMethodHandle: kotlin.Any, vararg bootstrapMethodArguments: kotlin.Any): T of kotlin.jvm.internal.<jvm-indy> declared in kotlin.jvm.internal' type=kotlin.Function0<kotlin.Unit> origin=null
+                <T>: kotlin.Function0<kotlin.Unit>
+                dynamicCall: CALL 'public final fun invoke (p0: kotlin.Function0<kotlin.Unit>): kotlin.Function0<kotlin.Unit> declared in kotlin.jvm.internal.invokeDynamic' type=kotlin.Function0<kotlin.Unit> origin=null
+                  p0: GET_VAR 'onCardClick: kotlin.Function0<kotlin.Unit> declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=kotlin.Function0<kotlin.Unit> origin=null
+                bootstrapMethodHandle: CALL 'public final fun <jvm-method-handle> (tag: kotlin.Int, owner: kotlin.String, name: kotlin.String, descriptor: kotlin.String, isInterface: kotlin.Boolean): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                  tag: CONST Int type=kotlin.Int value=6
+                  owner: CONST String type=kotlin.String value="java/lang/invoke/LambdaMetafactory"
+                  name: CONST String type=kotlin.String value="metafactory"
+                  descriptor: CONST String type=kotlin.String value="(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"
+                  isInterface: CONST Boolean type=kotlin.Boolean value=false
+                bootstrapMethodArguments: VARARG type=kotlin.Array<kotlin.Any> varargElementType=kotlin.Any
+                  CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                    method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (): R of kotlin.Function0 [operator] declared in kotlin.Function0' type=kotlin.Any
+                  RAW_FUNCTION_REFERENCE 'private final fun StreakCard$lambda$13 ($onCardClick: kotlin.Function0<kotlin.Unit>): kotlin.Unit? declared in com.varshith.consistly.ui.components.StreakCardKt' type=kotlin.Any
+                  CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                    method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (): kotlin.Unit? [fake_override,operator] declared in kotlin.jvm.internal.invokeDynamic.<fake>' type=kotlin.Any
+            $mask0: CONST Int type=kotlin.Int value=7
+            $handler: CONST Null type=kotlin.Any? value=null
+          enabled: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+            CONST Boolean type=kotlin.Boolean value=false
+          onClickLabel: COMPOSITE type=kotlin.String? origin=DEFAULT_VALUE
+            CONST Null type=kotlin.String? value=null
+          role: COMPOSITE type=androidx.compose.ui.semantics.Role? origin=DEFAULT_VALUE
+            CONST Null type=androidx.compose.ui.semantics.Role? value=null
+          onLongClickLabel: COMPOSITE type=kotlin.String? origin=DEFAULT_VALUE
+            CONST Null type=kotlin.String? value=null
+          onLongClick: COMPOSITE type=kotlin.Function0<kotlin.Unit>? origin=DEFAULT_VALUE
+            CONST Null type=kotlin.Function0<kotlin.Unit>? value=null
+          onDoubleClick: COMPOSITE type=kotlin.Function0<kotlin.Unit>? origin=DEFAULT_VALUE
+            CONST Null type=kotlin.Function0<kotlin.Unit>? value=null
+          onClick: BLOCK type=kotlin.Function0<kotlin.Unit> origin=LAMBDA
+            COMPOSITE type=kotlin.Unit origin=null
+            CALL 'public final fun <jvm-indy> <T> (dynamicCall: T of kotlin.jvm.internal.<jvm-indy>, bootstrapMethodHandle: kotlin.Any, vararg bootstrapMethodArguments: kotlin.Any): T of kotlin.jvm.internal.<jvm-indy> declared in kotlin.jvm.internal' type=kotlin.Function0<kotlin.Unit> origin=null
+              <T>: kotlin.Function0<kotlin.Unit>
+              dynamicCall: CALL 'public final fun invoke (p0: androidx.compose.ui.hapticfeedback.HapticFeedback, p1: androidx.compose.runtime.MutableState<kotlin.Boolean>): kotlin.Function0<kotlin.Unit> declared in kotlin.jvm.internal.invokeDynamic' type=kotlin.Function0<kotlin.Unit> origin=null
+                p0: GET_VAR 'val hapticFeedback: androidx.compose.ui.hapticfeedback.HapticFeedback [val] declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=androidx.compose.ui.hapticfeedback.HapticFeedback origin=null
+                p1: GET_VAR 'val isExpanded$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean> [val] declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=androidx.compose.runtime.MutableState<kotlin.Boolean> origin=null
+              bootstrapMethodHandle: CALL 'public final fun <jvm-method-handle> (tag: kotlin.Int, owner: kotlin.String, name: kotlin.String, descriptor: kotlin.String, isInterface: kotlin.Boolean): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                tag: CONST Int type=kotlin.Int value=6
+                owner: CONST String type=kotlin.String value="java/lang/invoke/LambdaMetafactory"
+                name: CONST String type=kotlin.String value="metafactory"
+                descriptor: CONST String type=kotlin.String value="(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"
+                isInterface: CONST Boolean type=kotlin.Boolean value=false
+              bootstrapMethodArguments: VARARG type=kotlin.Array<kotlin.Any> varargElementType=kotlin.Any
+                CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                  method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (): R of kotlin.Function0 [operator] declared in kotlin.Function0' type=kotlin.Any
+                RAW_FUNCTION_REFERENCE 'private final fun StreakCard$lambda$14 ($hapticFeedback: androidx.compose.ui.hapticfeedback.HapticFeedback, $isExpanded$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean>): kotlin.Unit? declared in com.varshith.consistly.ui.components.StreakCardKt' type=kotlin.Any
+                CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                  method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (): kotlin.Unit? [fake_override,operator] declared in kotlin.jvm.internal.invokeDynamic.<fake>' type=kotlin.Any
+          $mask0: CONST Int type=kotlin.Int value=63
+          $handler: CONST Null type=kotlin.Any? value=null
+        mergeDescendants: COMPOSITE type=kotlin.Boolean origin=DEFAULT_VALUE
+          CONST Boolean type=kotlin.Boolean value=false
+        properties: BLOCK type=@[ExtensionFunctionType] kotlin.Function1<androidx.compose.ui.semantics.SemanticsPropertyReceiver, kotlin.Unit> origin=LAMBDA
+          COMPOSITE type=kotlin.Unit origin=null
+          CALL 'public final fun <jvm-indy> <T> (dynamicCall: T of kotlin.jvm.internal.<jvm-indy>, bootstrapMethodHandle: kotlin.Any, vararg bootstrapMethodArguments: kotlin.Any): T of kotlin.jvm.internal.<jvm-indy> declared in kotlin.jvm.internal' type=@[ExtensionFunctionType] kotlin.Function1<androidx.compose.ui.semantics.SemanticsPropertyReceiver, kotlin.Unit> origin=null
+            <T>: @[ExtensionFunctionType] kotlin.Function1<androidx.compose.ui.semantics.SemanticsPropertyReceiver, kotlin.Unit>
+            dynamicCall: CALL 'public final fun invoke (p0: com.varshith.consistly.data.models.StreakEntity, p1: androidx.compose.runtime.MutableState<kotlin.Boolean>): @[ExtensionFunctionType] kotlin.Function1<androidx.compose.ui.semantics.SemanticsPropertyReceiver, kotlin.Unit> declared in kotlin.jvm.internal.invokeDynamic' type=@[ExtensionFunctionType] kotlin.Function1<androidx.compose.ui.semantics.SemanticsPropertyReceiver, kotlin.Unit> origin=null
+              p0: GET_VAR 'streak: com.varshith.consistly.data.models.StreakEntity declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=com.varshith.consistly.data.models.StreakEntity origin=null
+              p1: GET_VAR 'val isExpanded$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean> [val] declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=androidx.compose.runtime.MutableState<kotlin.Boolean> origin=null
+            bootstrapMethodHandle: CALL 'public final fun <jvm-method-handle> (tag: kotlin.Int, owner: kotlin.String, name: kotlin.String, descriptor: kotlin.String, isInterface: kotlin.Boolean): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+              tag: CONST Int type=kotlin.Int value=6
+              owner: CONST String type=kotlin.String value="java/lang/invoke/LambdaMetafactory"
+              name: CONST String type=kotlin.String value="metafactory"
+              descriptor: CONST String type=kotlin.String value="(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"
+              isInterface: CONST Boolean type=kotlin.Boolean value=false
+            bootstrapMethodArguments: VARARG type=kotlin.Array<kotlin.Any> varargElementType=kotlin.Any
+              CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (p1: P1 of kotlin.Function1): R of kotlin.Function1 [operator] declared in kotlin.Function1' type=kotlin.Any
+              RAW_FUNCTION_REFERENCE 'private final fun StreakCard$lambda$16 ($streak: com.varshith.consistly.data.models.StreakEntity, $isExpanded$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean>, $this$semantics: androidx.compose.ui.semantics.SemanticsPropertyReceiver): kotlin.Unit? declared in com.varshith.consistly.ui.components.StreakCardKt' type=kotlin.Any
+              CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+                method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (p1: androidx.compose.ui.semantics.SemanticsPropertyReceiver): kotlin.Unit? [fake_override,operator] declared in kotlin.jvm.internal.invokeDynamic.<fake>' type=kotlin.Any
+        $mask0: CONST Int type=kotlin.Int value=1
+        $handler: CONST Null type=kotlin.Any? value=null
+      shape: COMPOSITE type=androidx.compose.ui.graphics.Shape? origin=DEFAULT_VALUE
+        CONST Null type=androidx.compose.ui.graphics.Shape? value=null
+      colors: CALL 'public final fun cardColors-nlx5xbs$default ($this: androidx.compose.material3.CardDefaults, containerColor: androidx.compose.ui.graphics.Color, contentColor: androidx.compose.ui.graphics.Color, disabledContainerColor: androidx.compose.ui.graphics.Color, disabledContentColor: androidx.compose.ui.graphics.Color, $mask0: kotlin.Int, $handler: kotlin.Any?): androidx.compose.material3.CardColors declared in androidx.compose.material3.CardDefaults' type=androidx.compose.material3.CardColors origin=DEFAULT_DISPATCH_CALL
+        $this: GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:androidx.compose.material3.CardDefaults visibility:public [final,static]' type=androidx.compose.material3.CardDefaults origin=null
+        containerColor: CALL 'public final fun copy-wmQWz5c$default (arg0: androidx.compose.ui.graphics.Color, alpha: kotlin.Float, red: kotlin.Float, green: kotlin.Float, blue: kotlin.Float, $mask0: kotlin.Int, $handler: kotlin.Any?): androidx.compose.ui.graphics.Color declared in androidx.compose.ui.graphics.Color' type=androidx.compose.ui.graphics.Color origin=DEFAULT_DISPATCH_CALL
+          arg0: CALL 'public final fun getSurfaceVariant-0d7_KjU (): androidx.compose.ui.graphics.Color declared in androidx.compose.material3.ColorScheme' type=androidx.compose.ui.graphics.Color origin=GET_PROPERTY
+            $this: CALL 'public final fun <get-colorScheme> (): androidx.compose.material3.ColorScheme declared in androidx.compose.material3.MaterialTheme' type=androidx.compose.material3.ColorScheme origin=GET_PROPERTY
+              $this: GET_FIELD 'FIELD FIELD_FOR_OBJECT_INSTANCE name:INSTANCE type:androidx.compose.material3.MaterialTheme visibility:public [final,static]' type=androidx.compose.material3.MaterialTheme origin=null
+          alpha: CONST Float type=kotlin.Float value=0.95
+          red: COMPOSITE type=kotlin.Float origin=DEFAULT_VALUE
+            CONST Float type=kotlin.Float value=0.0
+          green: COMPOSITE type=kotlin.Float origin=DEFAULT_VALUE
+            CONST Float type=kotlin.Float value=0.0
+          blue: COMPOSITE type=kotlin.Float origin=DEFAULT_VALUE
+            CONST Float type=kotlin.Float value=0.0
+          $mask0: CONST Int type=kotlin.Int value=14
+          $handler: CONST Null type=kotlin.Any? value=null
+        contentColor: COMPOSITE type=androidx.compose.ui.graphics.Color origin=DEFAULT_VALUE
+          CALL 'public final fun <unsafe-coerce> <T, R> (v: T of kotlin.jvm.internal.<unsafe-coerce>): R of kotlin.jvm.internal.<unsafe-coerce> declared in kotlin.jvm.internal' type=androidx.compose.ui.graphics.Color origin=null
+            <T>: kotlin.Long
+            <R>: androidx.compose.ui.graphics.Color
+            v: CONST Long type=kotlin.Long value=0
+        disabledContainerColor: COMPOSITE type=androidx.compose.ui.graphics.Color origin=DEFAULT_VALUE
+          CALL 'public final fun <unsafe-coerce> <T, R> (v: T of kotlin.jvm.internal.<unsafe-coerce>): R of kotlin.jvm.internal.<unsafe-coerce> declared in kotlin.jvm.internal' type=androidx.compose.ui.graphics.Color origin=null
+            <T>: kotlin.Long
+            <R>: androidx.compose.ui.graphics.Color
+            v: CONST Long type=kotlin.Long value=0
+        disabledContentColor: COMPOSITE type=androidx.compose.ui.graphics.Color origin=DEFAULT_VALUE
+          CALL 'public final fun <unsafe-coerce> <T, R> (v: T of kotlin.jvm.internal.<unsafe-coerce>): R of kotlin.jvm.internal.<unsafe-coerce> declared in kotlin.jvm.internal' type=androidx.compose.ui.graphics.Color origin=null
+            <T>: kotlin.Long
+            <R>: androidx.compose.ui.graphics.Color
+            v: CONST Long type=kotlin.Long value=0
+        $mask0: CONST Int type=kotlin.Int value=14
+        $handler: CONST Null type=kotlin.Any? value=null
+      elevation: COMPOSITE type=androidx.compose.material3.CardElevation? origin=DEFAULT_VALUE
+        CONST Null type=androidx.compose.material3.CardElevation? value=null
+      border: COMPOSITE type=androidx.compose.foundation.BorderStroke? origin=DEFAULT_VALUE
+        CONST Null type=androidx.compose.foundation.BorderStroke? value=null
+      content: BLOCK type=@[ExtensionFunctionType] kotlin.Function1<androidx.compose.foundation.layout.ColumnScope, kotlin.Unit> origin=LAMBDA
+        COMPOSITE type=kotlin.Unit origin=null
+        CALL 'public final fun <jvm-indy> <T> (dynamicCall: T of kotlin.jvm.internal.<jvm-indy>, bootstrapMethodHandle: kotlin.Any, vararg bootstrapMethodArguments: kotlin.Any): T of kotlin.jvm.internal.<jvm-indy> declared in kotlin.jvm.internal' type=@[ExtensionFunctionType] kotlin.Function1<androidx.compose.foundation.layout.ColumnScope, kotlin.Unit> origin=null
+          <T>: @[ExtensionFunctionType] kotlin.Function1<androidx.compose.foundation.layout.ColumnScope, kotlin.Unit>
+          dynamicCall: CALL 'public final fun invoke (p0: com.varshith.consistly.data.models.StreakEntity, p1: androidx.compose.runtime.MutableState<kotlin.Boolean>, p2: androidx.compose.runtime.MutableState<kotlin.Boolean>, p3: kotlin.Function0<kotlin.Unit>, p4: androidx.compose.runtime.MutableState<kotlin.Boolean>, p5: @[FlexibleNullability] java.time.format.DateTimeFormatter?, p6: androidx.compose.ui.hapticfeedback.HapticFeedback, p7: kotlin.Function0<kotlin.Unit>, p8: kotlin.Function0<kotlin.Unit>): @[ExtensionFunctionType] kotlin.Function1<androidx.compose.foundation.layout.ColumnScope, kotlin.Unit> declared in kotlin.jvm.internal.invokeDynamic' type=@[ExtensionFunctionType] kotlin.Function1<androidx.compose.foundation.layout.ColumnScope, kotlin.Unit> origin=null
+            p0: GET_VAR 'streak: com.varshith.consistly.data.models.StreakEntity declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=com.varshith.consistly.data.models.StreakEntity origin=null
+            p1: GET_VAR 'val isExpanded$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean> [val] declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=androidx.compose.runtime.MutableState<kotlin.Boolean> origin=null
+            p2: GET_VAR 'val showMenu$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean> [val] declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=androidx.compose.runtime.MutableState<kotlin.Boolean> origin=null
+            p3: GET_VAR 'onCardClick: kotlin.Function0<kotlin.Unit> declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=kotlin.Function0<kotlin.Unit> origin=null
+            p4: GET_VAR 'val showDeleteDialog$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean> [val] declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=androidx.compose.runtime.MutableState<kotlin.Boolean> origin=null
+            p5: GET_VAR 'val dateFormatter: @[FlexibleNullability] java.time.format.DateTimeFormatter? [val] declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=@[FlexibleNullability] java.time.format.DateTimeFormatter? origin=null
+            p6: GET_VAR 'val hapticFeedback: androidx.compose.ui.hapticfeedback.HapticFeedback [val] declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=androidx.compose.ui.hapticfeedback.HapticFeedback origin=null
+            p7: GET_VAR 'onLogDay: kotlin.Function0<kotlin.Unit> declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=kotlin.Function0<kotlin.Unit> origin=null
+            p8: GET_VAR 'onBreakStreak: kotlin.Function0<kotlin.Unit> declared in com.varshith.consistly.ui.components.StreakCardKt.StreakCard' type=kotlin.Function0<kotlin.Unit> origin=null
+          bootstrapMethodHandle: CALL 'public final fun <jvm-method-handle> (tag: kotlin.Int, owner: kotlin.String, name: kotlin.String, descriptor: kotlin.String, isInterface: kotlin.Boolean): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+            tag: CONST Int type=kotlin.Int value=6
+            owner: CONST String type=kotlin.String value="java/lang/invoke/LambdaMetafactory"
+            name: CONST String type=kotlin.String value="metafactory"
+            descriptor: CONST String type=kotlin.String value="(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"
+            isInterface: CONST Boolean type=kotlin.Boolean value=false
+          bootstrapMethodArguments: VARARG type=kotlin.Array<kotlin.Any> varargElementType=kotlin.Any
+            CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+              method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (p1: P1 of kotlin.Function1): R of kotlin.Function1 [operator] declared in kotlin.Function1' type=kotlin.Any
+            RAW_FUNCTION_REFERENCE 'private final fun StreakCard$lambda$45 ($streak: com.varshith.consistly.data.models.StreakEntity, $isExpanded$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean>, $showMenu$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean>, $onCardClick: kotlin.Function0<kotlin.Unit>, $showDeleteDialog$delegate: androidx.compose.runtime.MutableState<kotlin.Boolean>, $dateFormatter: @[FlexibleNullability] java.time.format.DateTimeFormatter?, $hapticFeedback: androidx.compose.ui.hapticfeedback.HapticFeedback, $onLogDay: kotlin.Function0<kotlin.Unit>, $onBreakStreak: kotlin.Function0<kotlin.Unit>, $this$Card: androidx.compose.foundation.layout.ColumnScope): kotlin.Unit? declared in com.varshith.consistly.ui.components.StreakCardKt' type=kotlin.Any
+            CALL 'public final fun <jvm-original-method-type> (method: kotlin.Any): kotlin.Any declared in kotlin.jvm.internal' type=kotlin.Any origin=null
+              method: RAW_FUNCTION_REFERENCE 'public abstract fun invoke (p1: androidx.compose.foundation.layout.ColumnScope): kotlin.Unit? [fake_override,operator] declared in kotlin.jvm.internal.invokeDynamic.<fake>' type=kotlin.Any
+      $mask0: CONST Int type=kotlin.Int value=26
+      $handler: CONST Null type=kotlin.Any? value=null
+
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate(FunctionCodegen.kt:50)
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate$default(FunctionCodegen.kt:42)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generateMethodNode(ClassCodegen.kt:385)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generateMethod(ClassCodegen.kt:402)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ClassCodegen.generate(ClassCodegen.kt:169)
+	at org.jetbrains.kotlin.backend.jvm.FileCodegen.lower(JvmPhases.kt:41)
+	at org.jetbrains.kotlin.backend.common.phaser.PhaseBuildersKt.makeIrFilePhase$lambda$5(PhaseBuilders.kt:114)
+	at org.jetbrains.kotlin.backend.common.phaser.PhaseBuildersKt$createSimpleNamedCompilerPhase$1.phaseBody(PhaseBuilders.kt:71)
+	at org.jetbrains.kotlin.backend.common.phaser.SimpleNamedCompilerPhase.phaseBody(CompilerPhase.kt:226)
+	at org.jetbrains.kotlin.backend.common.phaser.AbstractNamedCompilerPhase.invoke(CompilerPhase.kt:113)
+	at org.jetbrains.kotlin.backend.common.phaser.PerformByIrFilePhase.invokeSequential(performByIrFile.kt:62)
+	... 43 more
+Caused by: org.jetbrains.kotlin.codegen.CompilationException: Back-end (JVM) Internal error: Couldn't inline method call: CALL 'public final fun remember <T> (calculation: @[DisallowComposableCalls] kotlin.Function0<T of androidx.compose.runtime.ComposablesKt.remember>): T of androidx.compose.runtime.ComposablesKt.remember [inline] declared in androidx.compose.runtime.ComposablesKt' type=androidx.compose.runtime.MutableState<kotlin.Boolean> origin=null
+Method: null
+File is unknown
+The root cause java.lang.IllegalStateException was thrown at: org.jetbrains.kotlin.codegen.inline.SourceCompilerForInlineKt.getMethodNode(SourceCompilerForInline.kt:118)
+	at org.jetbrains.kotlin.codegen.inline.InlineCodegen.performInline(InlineCodegen.kt:65)
+	at org.jetbrains.kotlin.backend.jvm.codegen.IrInlineCodegen.genInlineCall(IrInlineCodegen.kt:162)
+	at org.jetbrains.kotlin.backend.jvm.codegen.IrInlineCallGenerator.genCall(IrInlineCallGenerator.kt:36)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitCall(ExpressionCodegen.kt:647)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitCall(ExpressionCodegen.kt:137)
+	at org.jetbrains.kotlin.ir.expressions.IrCall.accept(IrCall.kt:24)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitVariable(ExpressionCodegen.kt:784)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitVariable(ExpressionCodegen.kt:137)
+	at org.jetbrains.kotlin.ir.declarations.IrVariable.accept(IrVariable.kt:36)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitStatementContainer(ExpressionCodegen.kt:573)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlockBody(ExpressionCodegen.kt:578)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.visitBlockBody(ExpressionCodegen.kt:137)
+	at org.jetbrains.kotlin.ir.expressions.IrBlockBody.accept(IrBlockBody.kt:20)
+	at org.jetbrains.kotlin.backend.jvm.codegen.ExpressionCodegen.generate(ExpressionCodegen.kt:239)
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.doGenerate(FunctionCodegen.kt:121)
+	at org.jetbrains.kotlin.backend.jvm.codegen.FunctionCodegen.generate(FunctionCodegen.kt:46)
+	... 53 more
+Caused by: java.lang.IllegalStateException: couldn't find inline method Landroidx/compose/runtime/ComposablesKt;.remember(Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	at org.jetbrains.kotlin.codegen.inline.SourceCompilerForInlineKt.getMethodNode(SourceCompilerForInline.kt:118)
+	at org.jetbrains.kotlin.codegen.inline.SourceCompilerForInlineKt.loadCompiledInlineFunction(SourceCompilerForInline.kt:96)
+	at org.jetbrains.kotlin.backend.jvm.codegen.IrSourceCompilerForInline.compileInlineFunction(IrSourceCompilerForInline.kt:91)
+	at org.jetbrains.kotlin.codegen.inline.InlineCodegen.compileInline(InlineCodegen.kt:43)
+	at org.jetbrains.kotlin.codegen.inline.InlineCodegen.performInline(InlineCodegen.kt:51)
+	... 68 more
+
+

@@ -18,8 +18,17 @@ import java.time.temporal.ChronoUnit
 class StreakRepository(private val streakDao: StreakDao) {
     val streaks: Flow<List<StreakEntity>> = streakDao.getAllStreaks()
 
-    suspend fun addStreak(streak: StreakEntity) {
-        streakDao.insertStreak(streak)
+    suspend fun addStreak(streak: StreakEntity): String {
+        // Generate a UUID for the streak if it doesn't have one
+        val streakToAdd = if (streak.id.isBlank()) {
+            streak.copy(id = java.util.UUID.randomUUID().toString())
+        } else {
+            streak
+        }
+
+        // Insert and return the ID
+        streakDao.insertStreak(streakToAdd)
+        return streakToAdd.id
     }
 
     suspend fun updateStreak(streak: StreakEntity) {

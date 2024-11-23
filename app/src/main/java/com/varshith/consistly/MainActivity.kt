@@ -18,6 +18,7 @@ import com.varshith.consistly.data.ConsistlyDatabase
 import com.varshith.consistly.data.repositories.StreakRepository
 import com.varshith.consistly.navigation.ConsistlyNavGraph
 import com.varshith.consistly.services.NotificationService
+import com.varshith.consistly.services.ReminderNotificationService
 import com.varshith.consistly.services.StreakReminderService
 import com.varshith.consistly.ui.theme.ConsistlyTheme
 import com.varshith.consistly.viewmodels.StreakViewModel
@@ -25,13 +26,13 @@ import com.varshith.consistly.viewmodels.StreakViewModel
 class MainActivity : ComponentActivity() {
     private lateinit var notificationService: NotificationService
     private lateinit var streakReminderService: StreakReminderService
-
+    private lateinit var reminderNotificationService: ReminderNotificationService
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
             notificationService.showWelcomeNotification()
-            streakReminderService.scheduleDaily()
+//            streakReminderService.scheduleDaily()
         }
     }
 
@@ -67,7 +68,7 @@ class MainActivity : ComponentActivity() {
         val streakRepository = StreakRepository(streakDao)
 
         val streakViewModel: StreakViewModel by viewModels {
-            StreakViewModel.provideFactory(streakRepository)
+            StreakViewModel.provideFactory(streakRepository,context = applicationContext)
         }
 
         setContent {

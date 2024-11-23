@@ -59,7 +59,7 @@ fun AddStreakScreen(
         TimePickerDialog(
             onDismiss = { showTimePicker = false },
             onTimeSelected = { time ->
-                reminderTime = time
+                reminderTime = time  // This should now work correctly
                 showTimePicker = false
             },
             initialTime = reminderTime ?: LocalTime.now()
@@ -335,49 +335,6 @@ fun AddStreakScreen(
         }
     }
 }
-
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun TimePickerDialog(
-//    onDismiss: () -> Unit,
-//    onTimeSelected: (Int, Int) -> Unit
-//) {
-//    var selectedHour by remember { mutableStateOf(12) }
-//    var selectedMinute by remember { mutableStateOf(0) }
-//
-//    AlertDialog(
-//        onDismissRequest = onDismiss,
-//        title = { Text("Select Time") },
-//        text = {
-//            Column(
-//                modifier = Modifier.padding(16.dp),
-//                horizontalAlignment = Alignment.CenterHorizontally
-//            ) {
-//                TimePicker(
-//                    state = rememberTimePickerState(),
-//                    onTimeChange = { hours, minutes ->
-//                        selectedHour = hours
-//                        selectedMinute = minutes
-//                    }
-//                )
-//            }
-//        },
-//        confirmButton = {
-//            TextButton(
-//                onClick = {
-//                    onTimeSelected(selectedHour, selectedMinute)
-//                }
-//            ) {
-//                Text("OK")
-//            }
-//        },
-//        dismissButton = {
-//            TextButton(onClick = onDismiss) {
-//                Text("Cancel")
-//            }
-//        }
-//    )
-//}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -1,11 +1,13 @@
 package com.varshith.consistly.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.varshith.consistly.data.models.StreakEntity
 import com.varshith.consistly.data.repositories.GoalFrequency
 import com.varshith.consistly.data.repositories.StreakRepository
+import com.varshith.consistly.services.ReminderNotificationService
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -13,13 +15,14 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 class StreakViewModel(
-    private val streakRepository: StreakRepository
+    private val streakRepository: StreakRepository,
+    private val context: Context
 ) : ViewModel() {
 
     // State holders for filtered views
     private val _filterCategory = MutableStateFlow<String?>(null)
     private val _sortOrder = MutableStateFlow(SortOrder.NEWEST)
-
+    private val notificationService = ReminderNotificationService(context)
     // Convert Flow to StateFlow for Compose
     val streaks = combine(
         streakRepository.streaks,
@@ -65,26 +68,49 @@ class StreakViewModel(
         icon: String? = null,
         priority: Int = 0
     ) {
+        println(reminderTimeString)
         viewModelScope.launch {
-            val newStreak = StreakEntity(
-                name = name,
-                description = description,
-                category = category,
-                goalFrequency = goalFrequency,
-                targetDays = targetDays,
-                reminderEnabled = reminderEnabled,
-                reminderTimeString = reminderTimeString,
-                color = color,
-                icon = icon,
-                priority = priority,
-                startDate = LocalDate.now(),
-                createdAt = LocalDate.now(),
-                modifiedAt = LocalDate.now()
-            )
-            streakRepository.addStreak(newStreak)
+            try {
+                val newStreak = StreakEntity(
+                    name = name,
+                    description = description,
+                    category = category,
+                    goalFrequency = goalFrequency,
+                    targetDays = targetDays,
+                    reminderEnabled = reminderEnabled,
+                    reminderTimeString = reminderTimeString,
+                    color = color,
+                    icon = icon,
+                    priority = priority,
+                    startDate = LocalDate.now(),
+                    createdAt = LocalDate.now(),
+                    modifiedAt = LocalDate.now()
+                )
+
+                val streakId = streakRepository.addStreak(newStreak)
+                println("Created streak with ID: $streakId")
+
+                // Schedule reminder if enabled
+                if (reminderEnabled && reminderTimeString != null) {
+                    try {
+                        val reminderTime = LocalTime.parse(reminderTimeString, DateTimeFormatter.ofPattern("HH:mm"))
+                        notificationService.scheduleStreakReminder(
+                            streakId = streakId,
+                            streakName = name,
+                            reminderTime = reminderTime
+                        )
+                        println("Reminder set successfully for streak: $streakId")
+                    } catch (e: Exception) {
+                        println("Failed to set reminder: ${e.message}")
+                        e.printStackTrace()
+                    }
+                }
+            } catch (e: Exception) {
+                println("Failed to create streak: ${e.message}")
+                e.printStackTrace()
+            }
         }
     }
-
     fun updateStreak(
         streakId: String,
         name: String? = null,
@@ -114,6 +140,27 @@ class StreakViewModel(
                     modifiedAt = LocalDate.now()
                 )
                 streakRepository.updateStreak(updatedStreak)
+
+                // Update reminder
+                if (reminderEnabled != null || reminderTimeString != null) {
+                    val isReminderEnabled = reminderEnabled ?: updatedStreak.reminderEnabled
+                    val timeString = reminderTimeString ?: updatedStreak.reminderTimeString
+
+                    if (isReminderEnabled && timeString != null) {
+                        try {
+                            val reminderTime = LocalTime.parse(timeString, DateTimeFormatter.ofPattern("HH:mm"))
+                            notificationService.scheduleStreakReminder(
+                                streakId = streakId,
+                                streakName = updatedStreak.name,
+                                reminderTime = reminderTime
+                            )
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    } else {
+                        notificationService.cancelStreakReminder(streakId)
+                    }
+                }
             }
         }
     }
@@ -137,6 +184,8 @@ class StreakViewModel(
 
     fun deleteStreak(streakId: String) {
         viewModelScope.launch {
+            // Cancel any existing reminders before deleting the streak
+            notificationService.cancelStreakReminder(streakId)
             streakRepository.deleteStreak(streakId)
         }
     }
@@ -182,11 +231,12 @@ class StreakViewModel(
     // Factory for ViewModel creation with dependencies
     companion object {
         fun provideFactory(
-            streakRepository: StreakRepository
+            streakRepository: StreakRepository,
+            context: Context
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return StreakViewModel(streakRepository) as T
+                return StreakViewModel(streakRepository, context) as T
             }
         }
     }

@@ -6,15 +6,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 
 @SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -24,7 +21,8 @@ fun TimePickerDialog(
     onTimeSelected: (LocalTime) -> Unit,
     initialTime: LocalTime = LocalTime.now()
 ) {
-    var selectedTime by remember { mutableStateOf(initialTime) }
+    var selectedHour by remember { mutableStateOf(initialTime.hour) }
+    var selectedMinute by remember { mutableStateOf(initialTime.minute) }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -45,11 +43,13 @@ fun TimePickerDialog(
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                val timePickerState = rememberTimePickerState(
+                    initialHour = initialTime.hour,
+                    initialMinute = initialTime.minute
+                )
+
                 TimePicker(
-                    state = rememberTimePickerState(
-                        initialHour = initialTime.hour,
-                        initialMinute = initialTime.minute
-                    ),
+                    state = timePickerState,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -63,7 +63,15 @@ fun TimePickerDialog(
                         Text("Cancel")
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(onClick = { onTimeSelected(selectedTime) }) {
+                    TextButton(
+                        onClick = {
+                            val newTime = LocalTime.of(
+                                timePickerState.hour,
+                                timePickerState.minute
+                            )
+                            onTimeSelected(newTime)
+                        }
+                    ) {
                         Text("OK")
                     }
                 }

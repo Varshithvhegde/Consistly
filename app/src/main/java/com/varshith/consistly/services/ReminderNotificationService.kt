@@ -1,5 +1,6 @@
 package com.varshith.consistly.services
 
+import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -7,20 +8,22 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.work.*
-import com.varshith.consistly.R
 import com.varshith.consistly.MainActivity
+import com.varshith.consistly.R
+import com.varshith.consistly.services.NotificationReceiver
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
-import java.util.concurrent.TimeUnit
-import kotlin.random.Random
 
 class ReminderNotificationService(private val context: Context) {
+    private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    private val notificationManager = context.getSystemService(NotificationManager::class.java)
+
     companion object {
         const val CHANNEL_ID = "streak_reminders"
         const val CHANNEL_NAME = "Streak Reminders"
         const val CHANNEL_DESCRIPTION = "Notifications for streak reminders"
+        const val NOTIFICATION_ACTION = "com.varshith.consistly.SHOW_NOTIFICATION"
     }
 
     init {
@@ -38,8 +41,6 @@ class ReminderNotificationService(private val context: Context) {
                 enableVibration(true)
                 enableLights(true)
             }
-
-            val notificationManager = context.getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel)
         }
     }
@@ -49,50 +50,92 @@ class ReminderNotificationService(private val context: Context) {
         streakName: String,
         reminderTime: LocalTime
     ) {
-        val workManager = WorkManager.getInstance(context)
+        println(streakId)
+        // Create intent for the broadcast receiver
+        val intent = Intent(context, NotificationReceiver::class.java).apply {
+            action = NOTIFICATION_ACTION
+            putExtra("streak_id", streakId)
+            putExtra("streak_name", streakName)
+        }
 
-        // Cancel any existing reminders for this streak
-        workManager.cancelAllWorkByTag("streak_reminder_$streakId")
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            streakId.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
-        // Calculate initial delay
+        // Calculate the first trigger time
         val currentTime = LocalDateTime.now()
         var scheduledTime = LocalDateTime.now().with(reminderTime)
 
-        // If the time has already passed today, schedule for tomorrow
         if (currentTime.isAfter(scheduledTime)) {
             scheduledTime = scheduledTime.plusDays(1)
         }
 
-        val initialDelay = scheduledTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() -
-                currentTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val triggerTime = scheduledTime
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
 
-        // Create work request for the reminder
-        val reminderRequest = PeriodicWorkRequestBuilder<StreakReminderWorker>(24, TimeUnit.HOURS)
-            .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
-            .setConstraints(
-                Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
-                    .build()
-            )
-            .addTag("streak_reminder_$streakId")
-            .setInputData(
-                workDataOf(
-                    "streak_id" to streakId,
-                    "streak_name" to streakName
-                )
-            )
-            .build()
-
-        // Enqueue the work request
-        workManager.enqueueUniquePeriodicWork(
-            "streak_reminder_$streakId",
-            ExistingPeriodicWorkPolicy.REPLACE,
-            reminderRequest
+        // Schedule the alarm
+        alarmManager.setRepeating(
+            AlarmManager.RTC_WAKEUP,
+            triggerTime,
+            AlarmManager.INTERVAL_DAY,
+            pendingIntent
         )
     }
 
-    fun cancelStreakReminder(streakId: Long) {
-        WorkManager.getInstance(context)
-            .cancelAllWorkByTag("streak_reminder_$streakId")
+    fun cancelStreakReminder(streakId: String) {
+        val intent = Intent(context, NotificationReceiver::class.java)
+        val notificationId = streakId.hashCode()
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            notificationId,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        alarmManager.cancel(pendingIntent)
+    }
+
+    fun showNotification(streakId: String, streakName: String) {
+        val notificationId = streakId.hashCode()
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra("streak_id", streakId)
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            notificationId,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val motivationalMessages = listOf(
+            "Time to keep your streak going! 🔥",
+            "Don't break the chain! 💪",
+            "Your future self will thank you! ⭐",
+            "Consistency is key! 🔑",
+            "Let's make it happen! 🎯"
+        )
+
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(streakName)
+            .setContentText(motivationalMessages.random())
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        notificationManager.notify(notificationId, notification)
+    }
+    fun rescheduleAllReminders() {
+        // Implement this method to reschedule all reminders from your database
+        // This should be called after device reboot
     }
 }

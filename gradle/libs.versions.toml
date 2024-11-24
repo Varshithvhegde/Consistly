@@ -1,5 +1,6 @@
 [versions]
 agp = "8.7.2"
+foundation = "1.7.5"
 gson = "2.10.1"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
@@ -17,6 +18,7 @@ workMultiprocess = "2.10.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "foundation" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-room-compiler-v250 = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }

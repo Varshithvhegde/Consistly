@@ -8,10 +8,10 @@
         <item name="android:windowLightNavigationBar">true</item>
     </style>
 
-    <style name="Theme.Consistly" parent="android:Theme.Material.Light.NoActionBar" tools:ignore="DuplicateDefinition">
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar">true</item>
-    </style>
+<!--    <style name="Theme.Consistly" parent="android:Theme.Material.Light.NoActionBar" tools:ignore="DuplicateDefinition">-->
+<!--        <item name="android:statusBarColor">@android:color/transparent</item>-->
+<!--        <item name="android:navigationBarColor">@android:color/transparent</item>-->
+<!--        <item name="android:windowLightStatusBar">true</item>-->
+<!--        <item name="android:windowLightNavigationBar">true</item>-->
+<!--    </style>-->
 </resources>

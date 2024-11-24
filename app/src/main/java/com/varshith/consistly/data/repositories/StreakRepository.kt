@@ -47,14 +47,6 @@ class StreakRepository(private val streakDao: StreakDao) {
         val today = LocalDate.now()
         val streak = getStreak(streakId) ?: return false
 
-        // Check if streak can be logged today
-//        if (!canLogStreak(streak, today)) {
-//            println("Can also Log today")
-//            return false
-//        }
-//        println("What is wrong")
-
-        // Update the streak with new log
         val updatedLogDates = streak.dailyLogDates + today
         val consecutiveDays = calculateConsecutiveDays(updatedLogDates)
 
@@ -69,23 +61,39 @@ class StreakRepository(private val streakDao: StreakDao) {
             monthlyStatsJson = updateMonthlyStats(streak, today),
             modifiedAt = today
         )
-        println(updatedStreak.toString())
 
         // Check for milestone achievements
         val achievements = checkAndUpdateAchievements(updatedStreak)
         if (achievements.isNotEmpty()) {
-            println("Inside IF")
             updateStreak(updatedStreak.copy(
                 achievementsJson = updateAchievements(updatedStreak.achievementsJson, achievements)
             ))
         } else {
-            println("Updating Streak")
             updateStreak(updatedStreak)
         }
 
         return true
     }
 
+    private fun calculateGoalSpecificCompletionRate(streak: StreakEntity): Float {
+        val today = LocalDate.now()
+
+        return when (streak.goalFrequency) {
+            GoalFrequency.DAILY -> {
+                calculateCompletionRate(streak.dailyLogDates, streak.startDate)
+            }
+            GoalFrequency.WEEKLY -> {
+                val startOfWeek = today.with(DayOfWeek.MONDAY)
+                val completedDays = streak.dailyLogDates.count { it >= startOfWeek && it <= today }
+                minOf((completedDays.toFloat() / streak.targetDays.toFloat()) * 100f, 100f)
+            }
+            GoalFrequency.MONTHLY -> {
+                val startOfMonth = today.withDayOfMonth(1)
+                val completedDays = streak.dailyLogDates.count { it >= startOfMonth && it <= today }
+                minOf((completedDays.toFloat() / streak.targetDays.toFloat()) * 100f, 100f)
+            }
+        }
+    }
     suspend fun breakStreak(streakId: String) {
         val streak = getStreak(streakId) ?: return
 
@@ -222,8 +230,31 @@ class StreakRepository(private val streakDao: StreakDao) {
     }
 
     private fun calculateCompletionRate(dates: List<LocalDate>, startDate: LocalDate): Float {
-        val totalDays = ChronoUnit.DAYS.between(startDate, LocalDate.now()) + 1
-        return (dates.size.toFloat() / totalDays.toFloat()) * 100
+        val today = LocalDate.now()
+
+        // Don't count future days
+        if (startDate.isAfter(today)) {
+            return 0f
+        }
+
+        // Calculate the number of days from start until today (inclusive)
+        val totalPossibleDays = ChronoUnit.DAYS.between(startDate, today) + 1
+
+        // Count only the completed days
+        val completedDays = dates.count {
+            !it.isAfter(today) && !it.isBefore(startDate)
+        }
+
+        // Prevent division by zero
+        if (totalPossibleDays <= 0) {
+            return 0f
+        }
+
+        // Calculate percentage and ensure it's between 0 and 100
+        return minOf(
+            (completedDays.toFloat() / totalPossibleDays.toFloat()) * 100f,
+            100f
+        ).coerceAtLeast(0f)
     }
 
     private fun updateWeeklyStats(streak: StreakEntity, today: LocalDate): String {

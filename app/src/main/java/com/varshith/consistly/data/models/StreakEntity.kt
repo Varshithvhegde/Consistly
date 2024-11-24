@@ -7,6 +7,7 @@ import androidx.room.TypeConverters
 import com.varshith.consistly.data.repositories.GoalFrequency
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.temporal.WeekFields
 import java.util.UUID
 
 @Entity(tableName = "streaks")
@@ -203,4 +204,128 @@ fun StreakEntity.getAchievements(): List<String> {
     } catch (e: Exception) {
         emptyList()
     }
+}
+
+fun StreakEntity.calculateStreaks(currentDate: LocalDate = LocalDate.now()): StreakEntity {
+    if (dailyLogDates.isEmpty()) {
+        return this.copy(currentStreak = 0, longestStreak = 0)
+    }
+
+    val sortedDates = dailyLogDates.sorted()
+    var currentStreakCount = 0
+    var maxStreakCount = 0
+    var lastDate: LocalDate? = null
+
+    // Calculate based on goal frequency
+    when (goalFrequency) {
+        GoalFrequency.DAILY -> {
+            // For daily goals, any missed day breaks the streak
+            for (date in sortedDates) {
+                if (lastDate == null || date == lastDate.plusDays(1)) {
+                    currentStreakCount++
+                } else {
+                    // Break in streak detected
+                    currentStreakCount = 1
+                }
+                maxStreakCount = maxOf(maxStreakCount, currentStreakCount)
+                lastDate = date
+            }
+
+            // Check if streak is still active
+            if (lastDate != null && lastDate != currentDate && lastDate != currentDate.minusDays(1)) {
+                currentStreakCount = 0
+            }
+        }
+
+        GoalFrequency.WEEKLY -> {
+            // For weekly goals, check if minimum days per week requirement is met
+            val weeklyLogs = dailyLogDates.groupBy { it.get(WeekFields.ISO.weekOfWeekBasedYear()) }
+
+            currentStreakCount = 0
+            var consecutiveWeeks = 0
+
+            weeklyLogs.entries.sortedBy { it.key }.forEach { (week, dates) ->
+                val daysCompleted = dates.size
+                if (daysCompleted >= (minimumDaysPerWeek ?: targetDays)) {
+                    consecutiveWeeks++
+                    currentStreakCount = consecutiveWeeks
+                } else {
+                    consecutiveWeeks = 0
+                }
+                maxStreakCount = maxOf(maxStreakCount, currentStreakCount)
+            }
+
+            // Check if current week's progress breaks the streak
+            val currentWeek = currentDate.get(WeekFields.ISO.weekOfWeekBasedYear())
+            val currentWeekLogs = weeklyLogs[currentWeek]?.size ?: 0
+            val daysLeftInWeek = 7 - currentDate.dayOfWeek.value + 1
+
+            if (currentWeekLogs + daysLeftInWeek < (minimumDaysPerWeek ?: targetDays)) {
+                currentStreakCount = 0
+            }
+        }
+
+        GoalFrequency.MONTHLY -> TODO()
+    }
+
+    // Handle grace period if enabled
+    if (gracePeriodinHours > 0 && currentStreakCount == 0) {
+        val lastLogDate = sortedDates.lastOrNull()
+        if (lastLogDate != null) {
+            val graceDeadline = currentDate.atStartOfDay().plusHours(gracePeriodinHours.toLong())
+            if (currentDate.atStartOfDay().isBefore(graceDeadline)) {
+                // Still within grace period, maintain previous streak
+                currentStreakCount = calculatePreviousStreak(sortedDates)
+            }
+        }
+    }
+
+    return this.copy(
+        currentStreak = currentStreakCount,
+        longestStreak = maxOf(maxStreakCount, longestStreak),
+        totalCompletedDays = dailyLogDates.size,
+        lastCompletedDate = sortedDates.lastOrNull(),
+        averageCompletionRate = calculateCompletionRate(sortedDates, currentDate)
+    )
+}
+
+private fun StreakEntity.calculatePreviousStreak(sortedDates: List<LocalDate>): Int {
+    var count = 0
+    var lastDate: LocalDate? = null
+
+    for (date in sortedDates) {
+        if (lastDate == null || date == lastDate.plusDays(1)) {
+            count++
+        } else {
+            count = 1
+        }
+        lastDate = date
+    }
+    return count
+}
+
+private fun StreakEntity.calculateCompletionRate(
+    sortedDates: List<LocalDate>,
+    currentDate: LocalDate
+): Float {
+    if (sortedDates.isEmpty()) return 0f
+
+    val startingDate = maxOf(startDate, sortedDates.first())
+    val totalDays = startingDate.until(currentDate).days + 1
+    return (sortedDates.size.toFloat() / totalDays) * 100
+}
+
+// Helper function to log a new day
+fun StreakEntity.logDay(date: LocalDate = LocalDate.now()): StreakEntity {
+    // Skip if already logged
+    if (date in dailyLogDates) return this
+
+    // Check if date is in skip dates
+    if (date in getSkipDates()) return this
+
+    val updatedLogs = dailyLogDates + date
+    return this.copy(
+        dailyLogDates = updatedLogs,
+        modifiedAt = LocalDate.now()
+    ).calculateStreaks(date)
 }

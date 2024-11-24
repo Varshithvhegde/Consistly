@@ -79,4 +79,5 @@ dependencies {
 //    kapt(libs.androidx.room.compiler)
     ksp(libs.androidx.room.compiler.v250)
     implementation(libs.androidx.work.multiprocess)
+    implementation(libs.androidx.foundation)
 }

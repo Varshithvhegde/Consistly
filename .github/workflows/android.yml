@@ -9,9 +9,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     
     - name: Set up JDK 17
       uses: actions/setup-java@v3
@@ -58,13 +62,13 @@ jobs:
 
     - name: Generate release date
       id: date
-      run: echo "::set-output name=date::$(date +'%Y-%m-%d-%H-%M')"
+      run: echo "release_date=$(date +'%Y-%m-%d-%H-%M')" >> $GITHUB_OUTPUT
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v${{ steps.date.outputs.date }}
-        name: Consistly Release ${{ steps.date.outputs.date }}
+        tag_name: v${{ steps.date.outputs.release_date }}
+        name: Consistly Release ${{ steps.date.outputs.release_date }}
         files: |
           app/build/outputs/apk/debug/app-debug.apk
           ${{steps.sign_app.outputs.signedReleaseFile}}
@@ -75,6 +79,6 @@ jobs:
           - Debug APK
           - Signed Release APK
           
-          Build Date: ${{ steps.date.outputs.date }}
+          Build Date: ${{ steps.date.outputs.release_date }}
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}  # Using PAT instead of GITHUB_TOKEN

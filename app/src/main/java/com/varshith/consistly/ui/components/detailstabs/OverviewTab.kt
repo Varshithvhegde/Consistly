@@ -502,17 +502,30 @@ private fun CalendarDay(
             .clickable { onDateClick(date) },
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = date.dayOfMonth.toString(),
-            style = MaterialTheme.typography.bodySmall,
-            color = when {
-                isSelected -> colorScheme.onPrimary
-                hasStreak -> colorScheme.primary
-                else -> colorScheme.onSurface
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = date.dayOfMonth.toString(),
+                style = MaterialTheme.typography.bodySmall,
+                color = when {
+                    isSelected -> colorScheme.onPrimary
+                    hasStreak -> colorScheme.primary
+                    else -> colorScheme.onSurface
+                }
+            )
+            if (hasStreak && !isSelected) {
+                Box(
+                    modifier = Modifier
+                        .size(4.dp)
+                        .clip(CircleShape)
+                        .background(colorScheme.primary)
+                )
             }
-        )
+        }
     }
 }
+
 private fun getDayName(dayOfWeek: Int): String {
     return when (dayOfWeek) {
         1 -> "Sunday"

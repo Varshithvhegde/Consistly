@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "master" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "master" ]
 
 jobs:
   build:
@@ -32,7 +32,6 @@ jobs:
     - name: Build Release APK
       run: ./gradlew assembleRelease
 
-    # Optional: Sign the Release APK
     - name: Sign Release APK
       uses: r0adkll/sign-android-release@v1
       id: sign_app
@@ -48,22 +47,34 @@ jobs:
     - name: Upload Debug APK
       uses: actions/upload-artifact@v3
       with:
-        name: debug-apk
+        name: Consistly-debug
         path: app/build/outputs/apk/debug/app-debug.apk
 
     - name: Upload Release APK
       uses: actions/upload-artifact@v3
       with:
-        name: release-apk
+        name: Consistly-release
         path: ${{steps.sign_app.outputs.signedReleaseFile}}
 
-    # Optional: Create GitHub Release with APKs
+    - name: Generate release date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y-%m-%d-%H-%M')"
+
     - name: Create Release
-      if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
+        tag_name: v${{ steps.date.outputs.date }}
+        name: Consistly Release ${{ steps.date.outputs.date }}
         files: |
           app/build/outputs/apk/debug/app-debug.apk
           ${{steps.sign_app.outputs.signedReleaseFile}}
+        body: |
+          Consistly App - Automated Release
+          
+          This release contains:
+          - Debug APK
+          - Signed Release APK
+          
+          Build Date: ${{ steps.date.outputs.date }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

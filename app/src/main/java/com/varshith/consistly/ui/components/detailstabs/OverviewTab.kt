@@ -464,8 +464,9 @@ private fun CalendarGrid(
 
                         CalendarDay(
                             date = date,
-                            isSelected = isSelected,
-                            hasStreak = hasStreak,
+                            isSelected = selectedDate == date,
+                            hasStreak = streak.dailyLogDates.contains(date),
+                            hasMissedStreak = isMissedDay(streak, date), // New method to determine missed days
                             onDateClick = onDateClick,
                             modifier = Modifier.weight(1f)
                         )
@@ -484,6 +485,7 @@ private fun CalendarDay(
     date: LocalDate,
     isSelected: Boolean,
     hasStreak: Boolean,
+    hasMissedStreak: Boolean, // New parameter
     onDateClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -496,6 +498,7 @@ private fun CalendarDay(
                 when {
                     isSelected -> colorScheme.primary
                     hasStreak -> colorScheme.primary.copy(alpha = 0.1f)
+                    hasMissedStreak -> colorScheme.error.copy(alpha = 0.1f) // Highlight missed days in light error color
                     else -> Color.Transparent
                 }
             )
@@ -511,6 +514,7 @@ private fun CalendarDay(
                 color = when {
                     isSelected -> colorScheme.onPrimary
                     hasStreak -> colorScheme.primary
+                    hasMissedStreak -> colorScheme.error // Change text color for missed days
                     else -> colorScheme.onSurface
                 }
             )
@@ -520,6 +524,15 @@ private fun CalendarDay(
                         .size(4.dp)
                         .clip(CircleShape)
                         .background(colorScheme.primary)
+                )
+            }
+            // Optional: Add a small dot for missed days
+            if (hasMissedStreak && !isSelected) {
+                Box(
+                    modifier = Modifier
+                        .size(4.dp)
+                        .clip(CircleShape)
+                        .background(colorScheme.error)
                 )
             }
         }
@@ -537,6 +550,13 @@ private fun getDayName(dayOfWeek: Int): String {
         7 -> "Saturday"
         else -> ""
     }
+}
+
+private fun isMissedDay(streak: StreakEntity, date: LocalDate): Boolean {
+    // Only mark days as missed between the streak's start date and today
+    return date >= streak.startDate &&
+            date < LocalDate.now() &&
+            !streak.dailyLogDates.contains(date)
 }
 
 

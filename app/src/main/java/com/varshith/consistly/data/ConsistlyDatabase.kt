@@ -10,7 +10,7 @@ import com.varshith.consistly.data.models.StreakEntity
 import com.varshith.consistly.utils.LocalDateConverter
 import com.varshith.consistly.utils.LocalDateListConverter
 
-@Database(entities = [StreakEntity::class], version = 2, exportSchema = false)
+@Database(entities = [StreakEntity::class], version = 3, exportSchema = false)
 @TypeConverters(
     LocalDateConverter::class,
     LocalDateListConverter::class

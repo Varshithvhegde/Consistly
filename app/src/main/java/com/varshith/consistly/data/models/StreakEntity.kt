@@ -16,6 +16,7 @@ data class StreakEntity(
     val name: String,
     val description: String? = null,
     val startDate: LocalDate = LocalDate.now(),
+    val endDate: LocalDate = LocalDate.now(),
     val dailyLogDates: List<LocalDate> = emptyList(),
     val currentStreak: Int = 0,
     val longestStreak: Int = 0,

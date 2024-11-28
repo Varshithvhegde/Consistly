@@ -32,8 +32,8 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            notificationService.showWelcomeNotification()
-//            streakReminderService.scheduleDaily()
+//            notificationService.showWelcomeNotification()
+            streakReminderService.scheduleDaily()
         }
     }
 
@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
                     this,
                     Manifest.permission.POST_NOTIFICATIONS
                 ) == PackageManager.PERMISSION_GRANTED -> {
-                    notificationService.showWelcomeNotification()
+//                    notificationService.showWelcomeNotification()
                     streakReminderService.scheduleDaily()
                 }
                 else -> {
@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         } else {
-            notificationService.showWelcomeNotification()
+//            notificationService.showWelcomeNotification()
             streakReminderService.scheduleDaily()
         }
 

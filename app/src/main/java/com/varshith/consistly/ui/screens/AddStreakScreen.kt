@@ -25,7 +25,9 @@ import com.varshith.consistly.viewmodels.StreakViewModel
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import com.varshith.consistly.R
+import com.varshith.consistly.ui.components.CalendarDatePicker
 import com.varshith.consistly.ui.components.TimePickerDialog
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,7 +46,10 @@ fun AddStreakScreen(
     var showNameError by remember { mutableStateOf(false) }
     var showCategoryDropdown by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
-
+    var startDate by remember { mutableStateOf(LocalDate.now()) }
+    var endDate by remember { mutableStateOf(LocalDate.now().plusDays(7)) }
+    var showStartDatePicker by remember { mutableStateOf(false) }
+    var showEndDatePicker by remember { mutableStateOf(false) }
     val categories = listOf(
         "Health" to painterResource(id= R.drawable.ic_favorite),
         "Fitness" to painterResource(id = R.drawable.ic_directional_run),
@@ -303,7 +308,51 @@ fun AddStreakScreen(
             }
 
             Spacer(modifier = Modifier.weight(1f))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Date Range",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
 
+                    // Start Date Button
+                    OutlinedButton(
+                        onClick = { showStartDatePicker = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_calendar_today),
+                            contentDescription = "Start Date",
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        Text("Start Date: ${startDate.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))}")
+                    }
+
+                    // End Date Button
+                    OutlinedButton(
+                        onClick = { showEndDatePicker = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_calendar_today),
+                            contentDescription = "End Date",
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        Text("End Date: ${endDate.format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))}")
+                    }
+                }
+            }
             // Create Button
             Button(
                 onClick = {
@@ -318,7 +367,9 @@ fun AddStreakScreen(
                         goalFrequency = goalFrequency,
                         targetDays = targetDays.toIntOrNull() ?: 1,
                         reminderEnabled = reminderEnabled,
-                        reminderTimeString = reminderTime?.format(DateTimeFormatter.ofPattern("HH:mm"))
+                        reminderTimeString = reminderTime?.format(DateTimeFormatter.ofPattern("HH:mm")),
+                        startDate = startDate,
+                        endDate = endDate
                     )
                     onNavigateBack()
                 },
@@ -333,6 +384,55 @@ fun AddStreakScreen(
                 )
             }
         }
+        if (showStartDatePicker) {
+            AlertDialog(
+                onDismissRequest = { showStartDatePicker = false },
+                title = { Text("Select Start Date") },
+                text = {
+                    CalendarDatePicker(
+                        selectedDate = startDate,
+                        onDateSelected = { date ->
+                            startDate = date
+                            if (endDate.isBefore(date)) {
+                                endDate = date
+                            }
+                            showStartDatePicker = false
+                        },
+                        minDate = LocalDate.now(),
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = { showStartDatePicker = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
+
+        if (showEndDatePicker) {
+            AlertDialog(
+                onDismissRequest = { showEndDatePicker = false },
+                title = { Text("Select End Date") },
+                text = {
+                    CalendarDatePicker(
+                        selectedDate = endDate,
+                        onDateSelected = { date ->
+                            endDate = date
+                            showEndDatePicker = false
+                        },
+                        minDate = startDate,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = { showEndDatePicker = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
+
     }
 }
 

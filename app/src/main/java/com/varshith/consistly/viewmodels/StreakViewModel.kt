@@ -66,7 +66,9 @@ class StreakViewModel(
         reminderTimeString: String? = null,
         color: String = "#FF4081",
         icon: String? = null,
-        priority: Int = 0
+        priority: Int = 0,
+        startDate: LocalDate= LocalDate.now(),
+        endDate: LocalDate= LocalDate.now()
     ) {
         println(reminderTimeString)
         viewModelScope.launch {
@@ -82,7 +84,8 @@ class StreakViewModel(
                     color = color,
                     icon = icon,
                     priority = priority,
-                    startDate = LocalDate.now(),
+                    startDate = startDate,
+                    endDate = endDate,
                     createdAt = LocalDate.now(),
                     modifiedAt = LocalDate.now()
                 )
@@ -97,7 +100,9 @@ class StreakViewModel(
                         notificationService.scheduleStreakReminder(
                             streakId = streakId,
                             streakName = name,
-                            reminderTime = reminderTime
+                            reminderTime = reminderTime,
+                            startDate = startDate,
+                            endDate = endDate
                         )
                         println("Reminder set successfully for streak: $streakId")
                     } catch (e: Exception) {
@@ -122,7 +127,9 @@ class StreakViewModel(
         reminderTimeString: String? = null,
         color: String? = null,
         icon: String? = null,
-        priority: Int? = null
+        priority: Int? = null,
+        startDate : LocalDate = LocalDate.now(),
+        endDate : LocalDate = LocalDate.now()
     ) {
         viewModelScope.launch {
             streakRepository.getStreak(streakId)?.let { currentStreak ->
@@ -137,7 +144,10 @@ class StreakViewModel(
                     color = color ?: currentStreak.color,
                     icon = icon ?: currentStreak.icon,
                     priority = priority ?: currentStreak.priority,
-                    modifiedAt = LocalDate.now()
+                    modifiedAt = LocalDate.now(),
+                    startDate = startDate,
+                    endDate = endDate
+
                 )
                 streakRepository.updateStreak(updatedStreak)
 
@@ -152,13 +162,15 @@ class StreakViewModel(
                             notificationService.scheduleStreakReminder(
                                 streakId = streakId,
                                 streakName = updatedStreak.name,
-                                reminderTime = reminderTime
+                                reminderTime = reminderTime,
+                                startDate = startDate,
+                                endDate = endDate
                             )
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
                     } else {
-                        notificationService.cancelStreakReminder(streakId)
+                        notificationService.cancelStreakReminder(streakId,startDate,endDate)
                     }
                 }
             }
@@ -182,10 +194,14 @@ class StreakViewModel(
         return streaks.value.find { it.id == streakId }
     }
 
-    fun deleteStreak(streakId: String) {
+    fun deleteStreak(
+        streakId: String,
+        startDate: LocalDate = LocalDate.now(),
+        endDate: LocalDate = LocalDate.now()
+                     ) {
         viewModelScope.launch {
             // Cancel any existing reminders before deleting the streak
-            notificationService.cancelStreakReminder(streakId)
+            notificationService.cancelStreakReminder(streakId,startDate,endDate)
             streakRepository.deleteStreak(streakId)
         }
     }

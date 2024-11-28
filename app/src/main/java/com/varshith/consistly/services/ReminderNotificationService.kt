@@ -11,6 +11,7 @@ import androidx.core.app.NotificationCompat
 import com.varshith.consistly.MainActivity
 import com.varshith.consistly.R
 import com.varshith.consistly.services.NotificationReceiver
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
@@ -44,62 +45,88 @@ class ReminderNotificationService(private val context: Context) {
             notificationManager.createNotificationChannel(channel)
         }
     }
-
     fun scheduleStreakReminder(
         streakId: String,
         streakName: String,
-        reminderTime: LocalTime
+        reminderTime: LocalTime,
+        startDate: LocalDate,
+        endDate: LocalDate
     ) {
-        println(streakId)
-        // Create intent for the broadcast receiver
-        val intent = Intent(context, NotificationReceiver::class.java).apply {
+        // Validate input dates
+        require(!startDate.isAfter(endDate)) { "Start date must be before or equal to end date" }
+        println("Start Date : $startDate")
+        println("End Date :  $endDate")
+        // Create base intent for the broadcast receiver
+        val baseIntent = Intent(context, NotificationReceiver::class.java).apply {
             action = NOTIFICATION_ACTION
             putExtra("streak_id", streakId)
             putExtra("streak_name", streakName)
         }
 
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            streakId.hashCode(),
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        // Calculate the first reminder datetime
+        val currentDateTime = LocalDateTime.now()
+        var currentReminderDateTime = LocalDateTime.of(
+            maxOf(currentDateTime.toLocalDate(), startDate),
+            reminderTime
         )
 
-        // Calculate the first trigger time
-        val currentTime = LocalDateTime.now()
-        var scheduledTime = LocalDateTime.now().with(reminderTime)
-
-        if (currentTime.isAfter(scheduledTime)) {
-            scheduledTime = scheduledTime.plusDays(1)
+        // If today's reminder time has passed, start from the next day
+        if (currentDateTime.isAfter(currentReminderDateTime)) {
+            currentReminderDateTime = currentReminderDateTime.plusDays(1)
         }
 
-        val triggerTime = scheduledTime
-            .atZone(ZoneId.systemDefault())
-            .toInstant()
-            .toEpochMilli()
+        // Schedule reminders for each day in the range
+        var scheduledDate = currentReminderDateTime.toLocalDate()
+        while (!scheduledDate.isAfter(endDate)) {
+            println("Scheduling reminder for: $scheduledDate")
+            val triggerDateTime = LocalDateTime.of(scheduledDate, reminderTime)
+            val triggerMillis = triggerDateTime
+                .atZone(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli()
 
-        // Schedule the alarm
-        alarmManager.setRepeating(
-            AlarmManager.RTC_WAKEUP,
-            triggerTime,
-            AlarmManager.INTERVAL_DAY,
-            pendingIntent
-        )
+            // Create a unique ID for each day's reminder
+            val uniqueId = "${streakId}_${scheduledDate}".hashCode()
+
+            // Create a pending intent with the unique ID
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                uniqueId,
+                baseIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            // Schedule a one-time exact alarm for this specific date
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerMillis,
+                pendingIntent
+            )
+
+            scheduledDate = scheduledDate.plusDays(1)
+        }
     }
 
-    fun cancelStreakReminder(streakId: String) {
-        val intent = Intent(context, NotificationReceiver::class.java)
-        val notificationId = streakId.hashCode()
-
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            notificationId,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        alarmManager.cancel(pendingIntent)
+    fun cancelStreakReminder(
+        streakId: String,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ) {
+        // Cancel all reminders in the date range
+        var currentDate = startDate
+        while (!currentDate.isAfter(endDate)) {
+            val uniqueId = "${streakId}_${currentDate}".hashCode()
+            val intent = Intent(context, NotificationReceiver::class.java)
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                uniqueId,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            alarmManager.cancel(pendingIntent)
+            currentDate = currentDate.plusDays(1)
+        }
     }
-
     fun showNotification(streakId: String, streakName: String) {
         val notificationId = streakId.hashCode()
 

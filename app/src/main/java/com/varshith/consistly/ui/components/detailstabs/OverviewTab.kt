@@ -1,10 +1,15 @@
 package com.varshith.consistly.ui.components.detailstabs
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,7 +46,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
@@ -56,6 +63,7 @@ import com.varshith.consistly.data.models.getCustomReminderDays
 import com.varshith.consistly.data.models.getMotivationalQuotes
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 @Composable
 fun OverviewTab(streak: StreakEntity) {
@@ -66,7 +74,7 @@ fun OverviewTab(streak: StreakEntity) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item { CircularProgressCard(streak) }
-        item { StatisticsCard(streak) }
+//        item { StatisticsCard(streak) }
         item { ReminderSection(streak) }
         item { StreakCalendarView(streak) }
 
@@ -78,140 +86,234 @@ fun OverviewTab(streak: StreakEntity) {
 
 @Composable
 private fun CircularProgressCard(streak: StreakEntity) {
-    val currentRotation = remember { Animatable(0f) }
-    val colorScheme = colorScheme  // Add this line to get the color scheme
+    val currentDate = remember { LocalDate.now() }
+    val sortedDates = remember(streak.dailyLogDates) {
+        streak.dailyLogDates.filter { it <= currentDate }.sorted()
+    }
 
-    LaunchedEffect(streak) {
+    val completionRate = remember(sortedDates, currentDate) {
+        if (sortedDates.isEmpty()) return@remember 0f
+        val daysBetween = ChronoUnit.DAYS.between(streak.startDate, currentDate) + 1
+        (sortedDates.size.toFloat() / daysBetween.toFloat()) * 100
+    }
+
+    val currentRotation = remember { Animatable(0f) }
+    val colorScheme = MaterialTheme.colorScheme
+
+    LaunchedEffect(completionRate) {
         currentRotation.animateTo(
-            targetValue = 360f * streak.averageCompletionRate,
+            targetValue = 360f * (completionRate / 100f),
             animationSpec = tween(1000, easing = FastOutSlowInEasing)
         )
     }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f)
-                .padding(24.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Canvas(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp)
-            ) {
-                // Background circle
-                drawCircle(
-                    color = colorScheme.surfaceVariant,  // Use colorScheme from MaterialTheme
-                    style = Stroke(width = 24f)
-                )
-
-                // Progress arc
-                drawArc(
-                    color = colorScheme.primary,  // Use colorScheme from MaterialTheme
-                    startAngle = -90f,
-                    sweepAngle = currentRotation.value,
-                    useCenter = false,
-                    style = Stroke(width = 24f, cap = StrokeCap.Round)
-                )
-            }
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "${streak.averageCompletionRate.toInt()}%",
-                    style = MaterialTheme.typography.displayMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Completion Rate",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = colorScheme.onSurfaceVariant  // Use colorScheme from MaterialTheme
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun StatisticsCard(streak: StreakEntity) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(180.dp),
         shape = RoundedCornerShape(24.dp)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            AnimatedStatItem(
-                value = streak.currentStreak,
-                label = "Current",
-                icon = painterResource(id = R.drawable.ic_whatshot)
-            )
-            AnimatedStatItem(
-                value = streak.longestStreak,
-                label = "Longest",
-                icon = painterResource(id = R.drawable.ic_emojievents)
-            )
-            AnimatedStatItem(
-                value = streak.totalCompletedDays,
-                label = "Total Days",
-                icon = painterResource(id = R.drawable.ic_today)
-            )
+            // Progress Circle
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Canvas(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    // Background gradient circle
+                    drawCircle(
+                        brush = Brush.sweepGradient(
+                            0f to colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                            1f to colorScheme.surfaceVariant
+                        ),
+                        style = Stroke(width = 12f)
+                    )
+
+                    // Progress arc with gradient
+                    drawArc(
+                        brush = Brush.linearGradient(
+                            colors = listOf(
+                                colorScheme.primary,
+                                colorScheme.tertiary
+                            )
+                        ),
+                        startAngle = -90f,
+                        sweepAngle = currentRotation.value,
+                        useCenter = false,
+                        style = Stroke(
+                            width = 12f,
+                            cap = StrokeCap.Round,
+                            pathEffect = PathEffect.cornerPathEffect(12f)
+                        )
+                    )
+                }
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "${completionRate.toInt()}%",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                    AnimatedVisibility(
+                        visible = completionRate > 0,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        Text(
+                            text = "completed",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            // Stats
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                StatRow(
+                    icon = painterResource(R.drawable.ic_whatshot),
+                    label = "Current Streak",
+                    value = "${streak.currentStreak} days"
+                )
+                StatRow(
+                    icon = painterResource(R.drawable.ic_emojievents),
+                    label = "Longest Streak",
+                    value = "${streak.longestStreak} days"
+                )
+                StatRow(
+                    icon = painterResource(R.drawable.ic_today),
+                    label = "Total Days",
+                    value = "${streak.totalCompletedDays} days"
+                )
+            }
         }
     }
 }
 
-
 @Composable
-private fun AnimatedStatItem(
-    value: Int,
-    label: String,
+private fun StatRow(
     icon: Painter,
-    modifier: Modifier = Modifier
+    label: String,
+    value: String
 ) {
-    var currentValue by remember { mutableStateOf(0) }
-
-    LaunchedEffect(value) {
-        animate(
-            initialValue = currentValue.toFloat(),
-            targetValue = value.toFloat(),
-            animationSpec = tween(1000)
-        ) { animatedValue, _ ->
-            currentValue = animatedValue.toInt()
-        }
-    }
-
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             painter = icon,
             contentDescription = null,
-            tint = colorScheme.primary,
-            modifier = Modifier.size(32.dp)
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.primary
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "$currentValue",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = colorScheme.onSurfaceVariant
-        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Column {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+        }
     }
 }
+//@Composable
+//private fun StatisticsCard(streak: StreakEntity) {
+//    Card(
+//        modifier = Modifier.fillMaxWidth(),
+//        shape = RoundedCornerShape(24.dp)
+//    ) {
+//        Row(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(24.dp),
+//            horizontalArrangement = Arrangement.SpaceBetween
+//        ) {
+//            AnimatedStatItem(
+//                value = streak.currentStreak,
+//                label = "Current",
+//                icon = painterResource(id = R.drawable.ic_whatshot)
+//            )
+//            AnimatedStatItem(
+//                value = streak.longestStreak,
+//                label = "Longest",
+//                icon = painterResource(id = R.drawable.ic_emojievents)
+//            )
+//            AnimatedStatItem(
+//                value = streak.totalCompletedDays,
+//                label = "Total Days",
+//                icon = painterResource(id = R.drawable.ic_today)
+//            )
+//        }
+//    }
+//}
+
+
+//@Composable
+//private fun AnimatedStatItem(
+//    value: Int,
+//    label: String,
+//    icon: Painter,
+//    modifier: Modifier = Modifier
+//) {
+//    var currentValue by remember { mutableStateOf(0) }
+//
+//    LaunchedEffect(value) {
+//        animate(
+//            initialValue = currentValue.toFloat(),
+//            targetValue = value.toFloat(),
+//            animationSpec = tween(1000)
+//        ) { animatedValue, _ ->
+//            currentValue = animatedValue.toInt()
+//        }
+//    }
+//
+//    Column(
+//        modifier = modifier,
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ) {
+//        Icon(
+//            painter = icon,
+//            contentDescription = null,
+//            tint = colorScheme.primary,
+//            modifier = Modifier.size(32.dp)
+//        )
+//        Spacer(modifier = Modifier.height(8.dp))
+//        Text(
+//            text = "$currentValue",
+//            style = MaterialTheme.typography.headlineMedium,
+//            fontWeight = FontWeight.Bold
+//        )
+//        Text(
+//            text = label,
+//            style = MaterialTheme.typography.bodyMedium,
+//            color = colorScheme.onSurfaceVariant
+//        )
+//    }
+//}
 
 
 @Composable

@@ -29,10 +29,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Switch
@@ -52,6 +54,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -73,7 +76,10 @@ fun OverviewTab(streak: StreakEntity) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item { CircularProgressCard(streak) }
+        item { ProgressCard(streak) }
+        item { PerformanceInsightsCard(streak) }
+
+//        item { CircularProgressCard(streak) }
 //        item { StatisticsCard(streak) }
         item { ReminderSection(streak) }
         item { StreakCalendarView(streak) }
@@ -85,32 +91,29 @@ fun OverviewTab(streak: StreakEntity) {
 }
 
 @Composable
-private fun CircularProgressCard(streak: StreakEntity) {
+private fun ProgressCard(streak: StreakEntity) {
     val currentDate = remember { LocalDate.now() }
-    val sortedDates = remember(streak.dailyLogDates) {
-        streak.dailyLogDates.filter { it <= currentDate }.sorted()
-    }
-
-    val completionRate = remember(sortedDates, currentDate) {
-        if (sortedDates.isEmpty()) return@remember 0f
+    val completionRate = remember(streak) {
+        if (streak.dailyLogDates.isEmpty()) return@remember 0f
         val daysBetween = ChronoUnit.DAYS.between(streak.startDate, currentDate) + 1
-        (sortedDates.size.toFloat() / daysBetween.toFloat()) * 100
+        (streak.dailyLogDates.size.toFloat() / daysBetween.toFloat()) * 100
     }
 
     val currentRotation = remember { Animatable(0f) }
-    val colorScheme = MaterialTheme.colorScheme
+    // Using Material Theme primary color instead of custom color
+    val progressColor = MaterialTheme.colorScheme.primary
 
     LaunchedEffect(completionRate) {
         currentRotation.animateTo(
             targetValue = 360f * (completionRate / 100f),
-            animationSpec = tween(1000, easing = FastOutSlowInEasing)
+            animationSpec = tween(1500, easing = FastOutSlowInEasing)
         )
     }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp),
+            .height(200.dp),
         shape = RoundedCornerShape(24.dp)
     ) {
         Row(
@@ -120,40 +123,36 @@ private fun CircularProgressCard(streak: StreakEntity) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Progress Circle
             Box(
                 modifier = Modifier
-                    .size(120.dp)
+                    .size(140.dp)
                     .padding(8.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Canvas(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    // Background gradient circle
+                    // Background circle
                     drawCircle(
-                        brush = Brush.sweepGradient(
-                            0f to colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                            1f to colorScheme.surfaceVariant
-                        ),
-                        style = Stroke(width = 12f)
+                        color = progressColor.copy(alpha = 0.1f),
+                        style = Stroke(width = 16f)
                     )
 
                     // Progress arc with gradient
                     drawArc(
                         brush = Brush.linearGradient(
                             colors = listOf(
-                                colorScheme.primary,
-                                colorScheme.tertiary
+                                progressColor,
+                                progressColor.copy(alpha = 0.7f)
                             )
                         ),
                         startAngle = -90f,
                         sweepAngle = currentRotation.value,
                         useCenter = false,
                         style = Stroke(
-                            width = 12f,
+                            width = 16f,
                             cap = StrokeCap.Round,
-                            pathEffect = PathEffect.cornerPathEffect(12f)
+                            pathEffect = PathEffect.cornerPathEffect(16f)
                         )
                     )
                 }
@@ -163,9 +162,10 @@ private fun CircularProgressCard(streak: StreakEntity) {
                 ) {
                     Text(
                         text = "${completionRate.toInt()}%",
-                        style = MaterialTheme.typography.headlineMedium.copy(
+                        style = MaterialTheme.typography.headlineLarge.copy(
                             fontWeight = FontWeight.Bold
-                        )
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     AnimatedVisibility(
                         visible = completionRate > 0,
@@ -173,35 +173,40 @@ private fun CircularProgressCard(streak: StreakEntity) {
                         exit = fadeOut() + shrinkVertically()
                     ) {
                         Text(
-                            text = "completed",
+                            text = "Completion Rate",
                             style = MaterialTheme.typography.labelMedium,
-                            color = colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
             }
 
-            // Stats
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                StatRow(
+                StatRowEnhanced(
                     icon = painterResource(R.drawable.ic_whatshot),
                     label = "Current Streak",
-                    value = "${streak.currentStreak} days"
+                    value = "${streak.currentStreak}",
+                    unit = "days",
+                    color = progressColor
                 )
-                StatRow(
+                StatRowEnhanced(
                     icon = painterResource(R.drawable.ic_emojievents),
-                    label = "Longest Streak",
-                    value = "${streak.longestStreak} days"
+                    label = "Best Streak",
+                    value = "${streak.longestStreak}",
+                    unit = "days",
+                    color = progressColor
                 )
-                StatRow(
+                StatRowEnhanced(
                     icon = painterResource(R.drawable.ic_today),
                     label = "Total Days",
-                    value = "${streak.totalCompletedDays} days"
+                    value = "${streak.totalCompletedDays}",
+                    unit = "completed",
+                    color = progressColor
                 )
             }
         }
@@ -209,112 +214,87 @@ private fun CircularProgressCard(streak: StreakEntity) {
 }
 
 @Composable
-private fun StatRow(
-    icon: Painter,
-    label: String,
-    value: String
-) {
-    Row(
+private fun PerformanceInsightsCard(streak: StreakEntity) {
+    Card(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        shape = RoundedCornerShape(24.dp)
     ) {
-        Icon(
-            painter = icon,
-            contentDescription = null,
-            modifier = Modifier.size(20.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Column {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = value,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.SemiBold
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_trendingup),
+                    contentDescription = "Performance Insights",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
                 )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = "Performance Insights",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Performance Metrics
+            PerformanceMetric(
+                label = "Consistency Rate",
+                value = calculateConsistencyRate(streak),
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            PerformanceMetric(
+                label = "Streak Completion",
+                value = "${streak.totalCompletedDays} / ${streak.targetDays} days",
+                color = MaterialTheme.colorScheme.secondary
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Missed Days Insight
+            val missedDays = calculateMissedDays(streak)
+            PerformanceMetric(
+                label = "Missed Days",
+                value = "$missedDays days",
+                color = MaterialTheme.colorScheme.error
             )
         }
     }
 }
-//@Composable
-//private fun StatisticsCard(streak: StreakEntity) {
-//    Card(
-//        modifier = Modifier.fillMaxWidth(),
-//        shape = RoundedCornerShape(24.dp)
-//    ) {
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(24.dp),
-//            horizontalArrangement = Arrangement.SpaceBetween
-//        ) {
-//            AnimatedStatItem(
-//                value = streak.currentStreak,
-//                label = "Current",
-//                icon = painterResource(id = R.drawable.ic_whatshot)
-//            )
-//            AnimatedStatItem(
-//                value = streak.longestStreak,
-//                label = "Longest",
-//                icon = painterResource(id = R.drawable.ic_emojievents)
-//            )
-//            AnimatedStatItem(
-//                value = streak.totalCompletedDays,
-//                label = "Total Days",
-//                icon = painterResource(id = R.drawable.ic_today)
-//            )
-//        }
-//    }
-//}
 
-
-//@Composable
-//private fun AnimatedStatItem(
-//    value: Int,
-//    label: String,
-//    icon: Painter,
-//    modifier: Modifier = Modifier
-//) {
-//    var currentValue by remember { mutableStateOf(0) }
-//
-//    LaunchedEffect(value) {
-//        animate(
-//            initialValue = currentValue.toFloat(),
-//            targetValue = value.toFloat(),
-//            animationSpec = tween(1000)
-//        ) { animatedValue, _ ->
-//            currentValue = animatedValue.toInt()
-//        }
-//    }
-//
-//    Column(
-//        modifier = modifier,
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ) {
-//        Icon(
-//            painter = icon,
-//            contentDescription = null,
-//            tint = colorScheme.primary,
-//            modifier = Modifier.size(32.dp)
-//        )
-//        Spacer(modifier = Modifier.height(8.dp))
-//        Text(
-//            text = "$currentValue",
-//            style = MaterialTheme.typography.headlineMedium,
-//            fontWeight = FontWeight.Bold
-//        )
-//        Text(
-//            text = label,
-//            style = MaterialTheme.typography.bodyMedium,
-//            color = colorScheme.onSurfaceVariant
-//        )
-//    }
-//}
-
+@Composable
+private fun PerformanceMetric(
+    label: String,
+    value: String,
+    color: Color
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            color = color,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
 
 @Composable
 private fun QuotesCard(quotes: List<String>) {
@@ -365,6 +345,61 @@ private fun QuotesCard(quotes: List<String>) {
                         color = colorScheme.surfaceVariant
                     )
                 }
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun StatRowEnhanced(
+    icon: Painter,
+    label: String,
+    value: String,
+    unit: String,
+    color: Color
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(color.copy(alpha = 0.1f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = icon,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = color
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Column {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+                Text(
+                    text = unit,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
             }
         }
     }
@@ -457,6 +492,7 @@ fun ReminderSection(streak: StreakEntity) {
         }
     }
 }
+
 
 @Composable
 fun StreakCalendarView(streak: StreakEntity) {
@@ -659,6 +695,19 @@ private fun isMissedDay(streak: StreakEntity, date: LocalDate): Boolean {
     return date >= streak.startDate &&
             date < LocalDate.now() &&
             !streak.dailyLogDates.contains(date)
+}
+
+private fun calculateConsistencyRate(streak: StreakEntity): String {
+    val totalDays = ChronoUnit.DAYS.between(streak.startDate, LocalDate.now()) + 1
+    val completedDays = streak.dailyLogDates.size
+    val consistencyRate = (completedDays.toFloat() / totalDays.toFloat() * 100).coerceIn(0f, 100f)
+    return "${consistencyRate.toInt()}%"
+}
+
+private fun calculateMissedDays(streak: StreakEntity): Int {
+    val totalDays = ChronoUnit.DAYS.between(streak.startDate, LocalDate.now()) + 1
+    val completedDays = streak.dailyLogDates.size
+    return (totalDays - completedDays).toInt()
 }
 
 

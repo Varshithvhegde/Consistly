@@ -77,6 +77,7 @@ fun OverviewTab(streak: StreakEntity) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item { ProgressCard(streak) }
+        item {AchievementsCard(streak)}
         item { PerformanceInsightsCard(streak) }
 
 //        item { CircularProgressCard(streak) }
@@ -98,15 +99,25 @@ private fun ProgressCard(streak: StreakEntity) {
         val daysBetween = ChronoUnit.DAYS.between(streak.startDate, currentDate) + 1
         (streak.dailyLogDates.size.toFloat() / daysBetween.toFloat()) * 100
     }
+    val safeCompletionRate = remember(completionRate) {
+        when {
+            completionRate.isNaN() -> 0f
+            completionRate.isInfinite() -> 0f
+            else -> completionRate.coerceIn(0f, 100f)
+        }
+    }
 
     val currentRotation = remember { Animatable(0f) }
-    // Using Material Theme primary color instead of custom color
-    val progressColor = MaterialTheme.colorScheme.primary
+    val progressColor = colorScheme.primary
+    val backgroundColor = colorScheme.surfaceVariant
 
-    LaunchedEffect(completionRate) {
+    LaunchedEffect(safeCompletionRate) {
         currentRotation.animateTo(
-            targetValue = 360f * (completionRate / 100f),
-            animationSpec = tween(1500, easing = FastOutSlowInEasing)
+            targetValue = 360f * (safeCompletionRate / 100f),
+            animationSpec = tween(
+                durationMillis = 1500,
+                easing = FastOutSlowInEasing
+            )
         )
     }
 
@@ -165,7 +176,7 @@ private fun ProgressCard(streak: StreakEntity) {
                         style = MaterialTheme.typography.headlineLarge.copy(
                             fontWeight = FontWeight.Bold
                         ),
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = colorScheme.onSurface
                     )
                     AnimatedVisibility(
                         visible = completionRate > 0,
@@ -175,7 +186,7 @@ private fun ProgressCard(streak: StreakEntity) {
                         Text(
                             text = "Completion Rate",
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -214,6 +225,142 @@ private fun ProgressCard(streak: StreakEntity) {
 }
 
 @Composable
+private fun AchievementsCard(streak: StreakEntity) {
+    val achievements = remember(streak) {
+        listOf(
+            Achievement(
+                title = "Getting Started",
+                description = "Started your first streak",
+                isUnlocked = true,
+                progress = 100f,
+                iconResId = R.drawable.ic_whatshot
+            ),
+            Achievement(
+                title = "Week Warrior",
+                description = "Maintained streak for 7 days",
+                isUnlocked = streak.currentStreak >= 7,
+                progress = (streak.currentStreak.toFloat() / 7f * 100f).coerceIn(0f, 100f),
+                iconResId = R.drawable.ic_today
+            ),
+            Achievement(
+                title = "Consistency Master",
+                description = "Reached ${streak.targetDays} days goal",
+                isUnlocked = streak.currentStreak >= streak.targetDays,
+                progress = (streak.currentStreak.toFloat() / streak.targetDays.toFloat() * 100f).coerceIn(0f, 100f),
+                iconResId = R.drawable.ic_emojievents
+            ),
+            Achievement(
+                title = "Perfect Week",
+                description = "Completed all days in a week",
+                isUnlocked = streak.dailyLogDates.takeLast(7).size == 7,
+                progress = (streak.dailyLogDates.takeLast(7).size.toFloat() / 7f * 100f).coerceIn(0f, 100f),
+                iconResId = R.drawable.ic_whatshot
+            )
+        )
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Achievements",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            achievements.forEach { achievement ->
+                AchievementRow(achievement = achievement)
+                if (achievement != achievements.last()) {
+                    Divider(
+                        modifier = Modifier.padding(vertical = 12.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+private data class Achievement(
+    val title: String,
+    val description: String,
+    val isUnlocked: Boolean,
+    val progress: Float,
+    val iconResId: Int  // Changed from Painter to Int resource ID
+)
+
+@Composable
+private fun AchievementRow(achievement: Achievement) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .background(
+                    color = if (achievement.isUnlocked)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.surfaceVariant,
+                    shape = CircleShape
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(achievement.iconResId),  // Now using painterResource within Composable
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = if (achievement.isUnlocked)
+                    MaterialTheme.colorScheme.onPrimary
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 16.dp)
+        ) {
+            Text(
+                text = achievement.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = achievement.description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            LinearProgressIndicator(
+                progress = achievement.progress / 100f,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp)),
+                color = if (achievement.isUnlocked)
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.surfaceVariant,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+            )
+        }
+    }
+}
+@Composable
 private fun PerformanceInsightsCard(streak: StreakEntity) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -231,7 +378,7 @@ private fun PerformanceInsightsCard(streak: StreakEntity) {
                 Icon(
                     painter = painterResource(R.drawable.ic_trendingup),
                     contentDescription = "Performance Insights",
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
                 Spacer(modifier = Modifier.width(16.dp))
@@ -248,7 +395,7 @@ private fun PerformanceInsightsCard(streak: StreakEntity) {
             PerformanceMetric(
                 label = "Consistency Rate",
                 value = calculateConsistencyRate(streak),
-                color = MaterialTheme.colorScheme.primary
+                color = colorScheme.primary
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -256,7 +403,7 @@ private fun PerformanceInsightsCard(streak: StreakEntity) {
             PerformanceMetric(
                 label = "Streak Completion",
                 value = "${streak.totalCompletedDays} / ${streak.targetDays} days",
-                color = MaterialTheme.colorScheme.secondary
+                color = colorScheme.secondary
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -266,7 +413,7 @@ private fun PerformanceInsightsCard(streak: StreakEntity) {
             PerformanceMetric(
                 label = "Missed Days",
                 value = "$missedDays days",
-                color = MaterialTheme.colorScheme.error
+                color = colorScheme.error
             )
         }
     }
@@ -382,7 +529,7 @@ private fun StatRowEnhanced(
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = colorScheme.onSurfaceVariant
             )
             Row(
                 verticalAlignment = Alignment.Bottom,
@@ -397,7 +544,7 @@ private fun StatRowEnhanced(
                 Text(
                     text = unit,
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
             }

@@ -1,8 +1,12 @@
 package com.varshith.consistly.ui.screens
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,6 +20,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -94,29 +100,7 @@ fun AddStreakScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text(
-                        text = "Start Your New Streak",
-                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
-                    )
-                    Text(
-                        text = "Create a new habit and track your progress",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+            AnimatedHeader()
 
             // Basic Information Section
             OutlinedTextField(
@@ -168,52 +152,11 @@ fun AddStreakScreen(
             )
 
             // Category Selection
-            ExposedDropdownMenuBox(
-                expanded = showCategoryDropdown,
-                onExpandedChange = { showCategoryDropdown = it },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                OutlinedTextField(
-                    value = selectedCategory ?: "Select Category",
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Category") },
-                    leadingIcon = {
-                        Icon(
-                            painter = categories.find { it.first == selectedCategory }?.second
-                                ?: painterResource(id = R.drawable.ic_category),
-                            contentDescription = "Category Icon"
-                        )
-                    },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = showCategoryDropdown) },
-                    modifier = Modifier
-                        .menuAnchor()
-                        .fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                )
-
-                ExposedDropdownMenu(
-                    expanded = showCategoryDropdown,
-                    onDismissRequest = { showCategoryDropdown = false }
-                ) {
-                    categories.forEach { (category, icon) ->
-                        DropdownMenuItem(
-                            text = { Text(category) },
-                            onClick = {
-                                selectedCategory = category
-                                showCategoryDropdown = false
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    painter = icon,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        )
-                    }
-                }
-            }
+            CategorySelector(
+                selectedCategory = selectedCategory,
+                onCategorySelected = { selectedCategory = it },
+                categories = categories
+            )
 
             // Frequency Selection
             Card(
@@ -251,61 +194,12 @@ fun AddStreakScreen(
             )
 
             // Reminder Section
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                Icons.Outlined.Notifications,
-                                contentDescription = "Reminder",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Text("Daily Reminder")
-                        }
-                        Switch(
-                            checked = reminderEnabled,
-                            onCheckedChange = { reminderEnabled = it }
-                        )
-                    }
-
-                    AnimatedVisibility(
-                        visible = reminderEnabled,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically()
-                    ) {
-                        OutlinedButton(
-                            onClick = { showTimePicker = true },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Icon(
-                               painter = painterResource(id = R.drawable.ic_schedule),
-                                contentDescription = "Time",
-                                modifier = Modifier.padding(end = 8.dp)
-                            )
-                            Text(
-                                reminderTime?.format(DateTimeFormatter.ofPattern("hh:mm a"))
-                                    ?: "Set Reminder Time"
-                            )
-                        }
-                    }
-                }
-            }
+            ReminderSection(
+                reminderEnabled = reminderEnabled,
+                onReminderEnabledChange = { reminderEnabled = it },
+                reminderTime = reminderTime,
+                onShowTimePicker = { showTimePicker = true }
+            )
 
             Spacer(modifier = Modifier.weight(1f))
             Card(
@@ -492,6 +386,228 @@ fun SegmentedButtons(
                     )
                 )
             }
+        }
+    }
+}
+
+
+@Composable
+private fun CategorySelector(
+    selectedCategory: String?,
+    onCategorySelected: (String) -> Unit,
+    categories: List<Pair<String, Painter>>
+) {
+    var showCategoryDropdown by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = "Choose Category",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(horizontal = 4.dp)
+        ) {
+            items(categories) { (category, icon) ->
+                val isSelected = category == selectedCategory
+                OutlinedCard(
+                    modifier = Modifier
+                        .animateContentSize()
+                        .clickable { onCategorySelected(category) },
+                    border = BorderStroke(
+                        width = 1.dp,
+                        color = if (isSelected)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.outline
+                    ),
+                    colors = CardDefaults.outlinedCardColors(
+                        containerColor = if (isSelected)
+                            MaterialTheme.colorScheme.primaryContainer
+                        else
+                            MaterialTheme.colorScheme.surface
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = icon,
+                            contentDescription = null,
+                            tint = if (isSelected)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = category,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = if (isSelected)
+                                    FontWeight.Bold
+                                else
+                                    FontWeight.Normal
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+@Composable
+private fun ReminderSection(
+    reminderEnabled: Boolean,
+    onReminderEnabledChange: (Boolean) -> Unit,
+    reminderTime: LocalTime?,
+    onShowTimePicker: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = if (reminderEnabled)
+                            Icons.Filled.Notifications
+                        else
+                            Icons.Outlined.Notifications,
+                        contentDescription = "Reminder",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Column {
+                        Text(
+                            text = "Daily Reminder",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = if (reminderEnabled) "Enabled" else "Disabled",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                Switch(
+                    checked = reminderEnabled,
+                    onCheckedChange = onReminderEnabledChange,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = MaterialTheme.colorScheme.primary,
+                        checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
+                        uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                        uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                )
+            }
+
+            AnimatedVisibility(
+                visible = reminderEnabled,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                OutlinedCard(
+                    onClick = onShowTimePicker,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_schedule),
+                            contentDescription = "Time",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = reminderTime?.format(
+                                DateTimeFormatter.ofPattern("hh:mm a")
+                            ) ?: "Set Reminder Time",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AnimatedHeader() {
+    var isAnimated by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        isAnimated = true
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .graphicsLayer {
+                alpha = if (isAnimated) 1f else 0f
+                translationY = if (isAnimated) 0f else 50f
+            }
+            .animateContentSize(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "Start Your New Streak",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+                Text(
+                    text = "Create a new habit and track your progress",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(
+                painter = painterResource(id = R.drawable.ic_task_alt),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(48.dp)
+                    .padding(8.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }

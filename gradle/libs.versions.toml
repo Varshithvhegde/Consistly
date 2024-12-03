@@ -24,6 +24,7 @@ androidx-room-compiler-v250 = { module = "androidx.room:room-compiler", version.
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+androidx-ui-util = { module = "androidx.compose.ui:ui-util" }
 androidx-work-multiprocess = { module = "androidx.work:work-multiprocess", version.ref = "workMultiprocess" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

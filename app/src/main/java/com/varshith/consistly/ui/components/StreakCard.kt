@@ -39,11 +39,9 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.fontscaling.MathUtils.lerp
+import androidx.compose.ui.util.lerp
 
-@SuppressLint("RestrictedApi")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun StreakCard(
@@ -203,14 +201,6 @@ fun StreakCard(
             ) {
                 Column(
                     modifier = Modifier
-//                .background(
-//                    brush = Brush.verticalGradient(
-//                        colors = listOf(
-//                            MaterialTheme.colorScheme.surfaceVariant,
-//                            MaterialTheme.colorScheme.surface
-//                        )
-//                    )
-//                )
                         .padding(16.dp)
                 ) {
                     // Modern Header with Animated Elements

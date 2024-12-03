@@ -1,4 +1,5 @@
 package com.varshith.consistly.ui.components
+import android.annotation.SuppressLint
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
@@ -29,7 +30,20 @@ import com.varshith.consistly.R
 import com.varshith.consistly.data.models.StreakEntity
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxState
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.fontscaling.MathUtils.lerp
 
+@SuppressLint("RestrictedApi")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun StreakCard(
@@ -51,6 +65,46 @@ fun StreakCard(
             stiffness = Spring.StiffnessLow
         )
     )
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { dismissValue ->
+            when (dismissValue) {
+                SwipeToDismissBoxValue.EndToStart -> {
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                    showDeleteDialog = true
+                    false
+                }
+                else -> false
+            }
+        }
+    )
+
+    // Premium animations
+    val swipeProgress = dismissState.progress
+    val scale by animateFloatAsState(
+        targetValue = 1f - (swipeProgress * 0.05f),
+        animationSpec = spring(stiffness = Spring.StiffnessLow)
+    )
+
+    val deleteIconScale by animateFloatAsState(
+        targetValue = lerp(0.8f, 1.2f, swipeProgress),
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        )
+    )
+
+    val swipeOffset = with(LocalDensity.current) {
+        (24.dp * swipeProgress).toPx()
+    }
+
+    LaunchedEffect(swipeProgress) {
+        if (swipeProgress > 0.15f && swipeProgress < 0.16f ||
+            swipeProgress > 0.45f && swipeProgress < 0.46f ||
+            swipeProgress > 0.75f && swipeProgress < 0.76f) {
+            hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        }
+    }
+
 
     val dateFormatter = remember { DateTimeFormatter.ofPattern("MMM d, yyyy") }
 
@@ -64,38 +118,91 @@ fun StreakCard(
         itemName = streak.name,
         message = "Are you sure you want to delete '${streak.name}' streak? This action cannot be undone."
     )
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.errorContainer,
+                                MaterialTheme.colorScheme.error
+                            ),
+                            startX = 0f,
+                            endX = swipeOffset * 3
+                        )
+                    ),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(end = 32.dp)
+                        .graphicsLayer {
+                            translationX = -swipeOffset
+                            scaleX = deleteIconScale
+                            scaleY = deleteIconScale
+                        },
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        modifier = Modifier.size(28.dp),
+                        tint = Color.White
+                    )
 
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .shadow(
-                elevation = if (isExpanded) 16.dp else 4.dp,
-                shape = RoundedCornerShape(24.dp),
-                spotColor = if (streak.isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-            )
-            .clickable { onCardClick() }
-            .combinedClickable(
-                onClick = {
-                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                    isExpanded = !isExpanded
+                    AnimatedVisibility(
+                        visible = swipeProgress > 0.5f,
+                        enter = fadeIn() + expandHorizontally(),
+                        exit = fadeOut() + shrinkHorizontally()
+                    ) {
+                        Text(
+                            "Delete Streak",
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
-            )
-            .semantics {
-                contentDescription = buildString {
-                    append("Streak for ${streak.name}. ")
-                    append("Current streak: ${streak.currentStreak} days. ")
-                    append("Status: ${if (streak.isActive) "Active" else "Broken"}. ")
-                    append("Double tap to ${if (isExpanded) "collapse" else "expand"} details.")
-                }
-            },
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f)
-        )
-    ) {
-        Column(
-            modifier = Modifier
+            }
+        },
+        content = {
+            Card(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .shadow(
+                        elevation = if (isExpanded) 16.dp else 4.dp,
+                        shape = RoundedCornerShape(24.dp),
+                        spotColor = if (streak.isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                    )
+                    .clickable { onCardClick() }
+                    .combinedClickable(
+                        onClick = {
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                            isExpanded = !isExpanded
+                        }
+                    )
+                    .semantics {
+                        contentDescription = buildString {
+                            append("Streak for ${streak.name}. ")
+                            append("Current streak: ${streak.currentStreak} days. ")
+                            append("Status: ${if (streak.isActive) "Active" else "Broken"}. ")
+                            append("Double tap to ${if (isExpanded) "collapse" else "expand"} details.")
+                        }
+                    },
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.95f)
+                )
+            ) {
+                Column(
+                    modifier = Modifier
 //                .background(
 //                    brush = Brush.verticalGradient(
 //                        colors = listOf(
@@ -104,247 +211,251 @@ fun StreakCard(
 //                        )
 //                    )
 //                )
-                .padding(16.dp)
-        ) {
-            // Modern Header with Animated Elements
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f)
+                        .padding(16.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(
-                                if (streak.isActive)
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                                else
-                                    MaterialTheme.colorScheme.error.copy(alpha = 0.1f)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_whatshot),
-                            contentDescription = null,
-                            tint = if (streak.isActive)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Column {
-                        Text(
-                            text = streak.name,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
-                        AnimatedVisibility(visible = !isExpanded) {
-                            Text(
-                                text = "${streak.currentStreak} days",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    StatusIndicator(
-                        isActive = streak.isActive,
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-
-                    Box {
-                        IconButton(onClick = { showMenu = true }) {
-                            Icon(
-                                imageVector = Icons.Default.MoreVert,
-                                contentDescription = "More options"
-                            )
-                        }
-
-                        DropdownMenu(
-                            expanded = showMenu,
-                            onDismissRequest = { showMenu = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("Details") },
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.Info,
-                                        contentDescription = null
-                                    )
-                                },
-                                onClick = {
-                                    showMenu = false
-                                    onCardClick()
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        "Delete",
-                                        color = MaterialTheme.colorScheme.error
-                                    )
-                                },
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.Delete,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.error
-                                    )
-                                },
-                                onClick = {
-                                    showMenu = false
-                                    showDeleteDialog = true
-                                }
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Expandable Content
-            AnimatedVisibility(
-                visible = isExpanded,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically()
-            ) {
-                Column(
-                    modifier = Modifier.padding(top = 16.dp)
-                ) {
-                    // Modern Progress Visualization
-                    ModernStreakProgress(
-                        currentStreak = streak.currentStreak,
-                        longestStreak = streak.longestStreak,
-                        isActive = streak.isActive
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Stats Grid
+                    // Modern Header with Animated Elements
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        ModernStatCard(
-                            title = "Current",
-                            value = "${streak.currentStreak}",
-                            subtitle = "days",
-                            icon = painterResource(id = R.drawable.ic_today),
-                            color = if (streak.isActive)
-                                MaterialTheme.colorScheme.primary
-                            else
-                                MaterialTheme.colorScheme.error,
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.weight(1f)
-                        )
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(
+                                        if (streak.isActive)
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                                        else
+                                            MaterialTheme.colorScheme.error.copy(alpha = 0.1f)
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_whatshot),
+                                    contentDescription = null,
+                                    tint = if (streak.isActive)
+                                        MaterialTheme.colorScheme.primary
+                                    else
+                                        MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
 
-                        ModernStatCard(
-                            title = "Longest",
-                            value = "${streak.longestStreak}",
-                            subtitle = "days",
-                            icon = painterResource(id = R.drawable.ic_emojievents),
-                            color = MaterialTheme.colorScheme.tertiary,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
+                            Spacer(modifier = Modifier.width(12.dp))
 
-//                     Recent Logs Section
-                    if (streak.dailyLogDates.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Recent Activity",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        streak.dailyLogDates
-                            .sortedDescending()
-                            .take(3)
-                            .forEach { date ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.CheckCircle,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
+                            Column {
+                                Text(
+                                    text = streak.name,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                AnimatedVisibility(visible = !isExpanded) {
                                     Text(
-                                        text = date.format(dateFormatter),
+                                        text = "${streak.currentStreak} days",
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            StatusIndicator(
+                                isActive = streak.isActive,
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+
+                            Box {
+                                IconButton(onClick = { showMenu = true }) {
+                                    Icon(
+                                        imageVector = Icons.Default.MoreVert,
+                                        contentDescription = "More options"
+                                    )
+                                }
+
+                                DropdownMenu(
+                                    expanded = showMenu,
+                                    onDismissRequest = { showMenu = false }
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("Details") },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Default.Info,
+                                                contentDescription = null
+                                            )
+                                        },
+                                        onClick = {
+                                            showMenu = false
+                                            onCardClick()
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                "Delete",
+                                                color = MaterialTheme.colorScheme.error
+                                            )
+                                        },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Default.Delete,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.error
+                                            )
+                                        },
+                                        onClick = {
+                                            showMenu = false
+                                            showDeleteDialog = true
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // Expandable Content
+                    AnimatedVisibility(
+                        visible = isExpanded,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(top = 16.dp)
+                        ) {
+                            // Modern Progress Visualization
+                            ModernStreakProgress(
+                                currentStreak = streak.currentStreak,
+                                longestStreak = streak.longestStreak,
+                                isActive = streak.isActive
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            // Stats Grid
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                ModernStatCard(
+                                    title = "Current",
+                                    value = "${streak.currentStreak}",
+                                    subtitle = "days",
+                                    icon = painterResource(id = R.drawable.ic_today),
+                                    color = if (streak.isActive)
+                                        MaterialTheme.colorScheme.primary
+                                    else
+                                        MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.weight(1f)
+                                )
+
+                                ModernStatCard(
+                                    title = "Longest",
+                                    value = "${streak.longestStreak}",
+                                    subtitle = "days",
+                                    icon = painterResource(id = R.drawable.ic_emojievents),
+                                    color = MaterialTheme.colorScheme.tertiary,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+
+//                     Recent Logs Section
+                            if (streak.dailyLogDates.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "Recent Activity",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                streak.dailyLogDates
+                                    .sortedDescending()
+                                    .take(3)
+                                    .forEach { date ->
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 4.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.CheckCircle,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                text = date.format(dateFormatter),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                            }
+                        }
+                    }
+
+                    // Action Buttons
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Button(
+                            onClick = {
+                                hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                onLogDay()
+                            },
+                            enabled = streak.isActive && !streak.dailyLogDates.contains(LocalDate.now()),
+                            modifier = Modifier.weight(1f),
+                            contentPadding = PaddingValues(vertical = 16.dp),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_add_task),
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Log Progress")
+                        }
+
+                        FilledTonalButton(
+                            onClick = {
+                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onBreakStreak()
+                            },
+                            modifier = Modifier.weight(1f),
+                            contentPadding = PaddingValues(vertical = 16.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.filledTonalButtonColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.error
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Close,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Break Streak")
+                        }
                     }
                 }
             }
-
-            // Action Buttons
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Button(
-                    onClick = {
-                        hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        onLogDay()
-                    },
-                    enabled = streak.isActive && !streak.dailyLogDates.contains(LocalDate.now()),
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(vertical = 16.dp),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_add_task),
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Log Progress")
-                }
-
-                FilledTonalButton(
-                    onClick = {
-                        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onBreakStreak()
-                    },
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(vertical = 16.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.filledTonalButtonColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Close,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Break Streak")
-                }
-            }
-        }
-    }
+        },
+        enableDismissFromEndToStart = true,
+        enableDismissFromStartToEnd = false
+    )
 }
 
 @Composable

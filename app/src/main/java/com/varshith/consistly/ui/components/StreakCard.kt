@@ -45,8 +45,8 @@ fun StreakCard(
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     val hapticFeedback = LocalHapticFeedback.current
-    var showMenu by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var bottomSheetVisible by remember { mutableStateOf(false) }
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { dismissValue ->
             when (dismissValue) {
@@ -166,9 +166,10 @@ fun StreakCard(
                     )
                     .clickable { onCardClick() }
                     .combinedClickable(
-                        onClick = {
+                        onClick = onCardClick,
+                        onLongClick = {
                             hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                            isExpanded = !isExpanded
+                            bottomSheetVisible = true
                         }
                     )
                     .semantics {
@@ -244,53 +245,6 @@ fun StreakCard(
                                 isActive = streak.isActive,
                                 modifier = Modifier.padding(end = 8.dp)
                             )
-
-                            Box {
-                                IconButton(onClick = { showMenu = true }) {
-                                    Icon(
-                                        imageVector = Icons.Default.MoreVert,
-                                        contentDescription = "More options"
-                                    )
-                                }
-
-                                DropdownMenu(
-                                    expanded = showMenu,
-                                    onDismissRequest = { showMenu = false }
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text("Details") },
-                                        leadingIcon = {
-                                            Icon(
-                                                imageVector = Icons.Default.Info,
-                                                contentDescription = null
-                                            )
-                                        },
-                                        onClick = {
-                                            showMenu = false
-                                            onCardClick()
-                                        }
-                                    )
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                "Delete",
-                                                color = MaterialTheme.colorScheme.error
-                                            )
-                                        },
-                                        leadingIcon = {
-                                            Icon(
-                                                imageVector = Icons.Default.Delete,
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.error
-                                            )
-                                        },
-                                        onClick = {
-                                            showMenu = false
-                                            showDeleteDialog = true
-                                        }
-                                    )
-                                }
-                            }
                         }
                     }
 
@@ -426,6 +380,13 @@ fun StreakCard(
                     }
                 }
             }
+            StreakBottomSheet(
+                visible = bottomSheetVisible,
+                onDismiss = { bottomSheetVisible = false },
+                onDetails = onCardClick,
+                onDelete = { showDeleteDialog = true },
+                streak = streak
+            )
         },
         enableDismissFromEndToStart = true,
         enableDismissFromStartToEnd = false

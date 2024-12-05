@@ -1,45 +1,23 @@
 package com.varshith.consistly.ui.components
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 
-/**
- * A modern, visually appealing delete confirmation dialog with enhanced user experience.
- *
- * @param visible Whether the dialog is currently visible
- * @param onDismiss Callback when the dialog is dismissed
- * @param onConfirm Callback when deletion is confirmed
- * @param itemName Name of the item to be deleted
- * @param title Custom title for the dialog (defaults to "Delete {itemName}")
- * @param message Custom message for the dialog
- * @param confirmButtonText Text for the confirm button
- * @param dismissButtonText Text for the dismiss button
- */
 @Composable
 fun DeleteConfirmationDialog(
     visible: Boolean,
@@ -47,102 +25,114 @@ fun DeleteConfirmationDialog(
     onConfirm: () -> Unit,
     itemName: String,
     title: String = "Delete $itemName",
-    message: String = "Are you sure you want to delete '$itemName'? This action cannot be undone.",
-    confirmButtonText: String = "Delete",
-    dismissButtonText: String = "Cancel"
+    message: String = "Are you sure you want to delete '$itemName'?"
 ) {
-    // Animation scale for the dialog
-    val dialogScale by animateFloatAsState(
-        targetValue = if (visible) 1f else 0.9f,
-        label = "Dialog Scale Animation"
-    )
+    val scale = remember { Animatable(0.8f) }
+    val rotation = remember { Animatable(0f) }
+
+    LaunchedEffect(visible) {
+        if (visible) {
+            scale.animateTo(1f, spring(stiffness = 300f))
+            rotation.animateTo(720f, spring(stiffness = 100f))
+        }
+    }
 
     if (visible) {
         AlertDialog(
             onDismissRequest = onDismiss,
-            // Use a card for more depth and modern look
+            modifier = Modifier
+                .padding(16.dp)
+                .scale(scale.value),
             icon = {
                 Icon(
                     imageVector = Icons.Default.Warning,
-                    contentDescription = "Delete Warning",
+                    contentDescription = "Warning",
                     modifier = Modifier
-                        .scale(1.2f) // Slightly larger icon
-                        .padding(top = 16.dp),
+                        .size(36.dp)
+                        .rotate(rotation.value),
                     tint = MaterialTheme.colorScheme.error
                 )
             },
             title = {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            text = {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = message,
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = title,
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.ExtraBold
+                        ),
+                        textAlign = TextAlign.Center
                     )
+                }
+            },
+            text = {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f)
+                    ),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.2f))
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = message,
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 }
             },
             confirmButton = {
                 Button(
                     onClick = onConfirm,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.error
                     ),
-                    modifier = Modifier.scale(dialogScale)
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = null,
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                    Text(
-                        text = confirmButtonText,
-                        style = MaterialTheme.typography.labelLarge
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            "Delete",
+                            style = MaterialTheme.typography.labelLarge
+                        )
+                    }
                 }
             },
             dismissButton = {
-                TextButton(
+                OutlinedButton(
                     onClick = onDismiss,
-                    modifier = Modifier.scale(dialogScale)
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                 ) {
-                    Text(
-                        text = dismissButtonText,
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    Text("Cancel")
                 }
             },
-            // Enhance dialog appearance
             containerColor = MaterialTheme.colorScheme.surface,
-            iconContentColor = MaterialTheme.colorScheme.error,
-            titleContentColor = MaterialTheme.colorScheme.onSurface,
-            textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-
-            // Add more dialog properties for a smoother experience
+            tonalElevation = 16.dp,
+            shape = MaterialTheme.shapes.extraLarge,
             properties = DialogProperties(
                 dismissOnBackPress = true,
-                dismissOnClickOutside = true
-            ),
-
-            // Increased elevation for more depth
-            tonalElevation = 12.dp,
-
-            // Adjust shape for a modern look
-            shape = MaterialTheme.shapes.large
+                dismissOnClickOutside = true,
+                usePlatformDefaultWidth = false
+            )
         )
     }
 }

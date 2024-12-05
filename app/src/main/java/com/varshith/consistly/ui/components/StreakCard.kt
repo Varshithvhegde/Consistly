@@ -164,9 +164,12 @@ fun StreakCard(
                         shape = RoundedCornerShape(24.dp),
                         spotColor = if (streak.isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
                     )
-                    .clickable { onCardClick() }
+//                    .clickable { onCardClick() }
                     .combinedClickable(
-                        onClick = onCardClick,
+                        onClick = {
+                            hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                            isExpanded = !isExpanded
+                        },
                         onLongClick = {
                             hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
                             bottomSheetVisible = true

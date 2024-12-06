@@ -1,100 +1,126 @@
 package com.varshith.consistly.ui.screens
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import com.varshith.consistly.R
+import com.varshith.consistly.data.models.StreakEntity
 import com.varshith.consistly.ui.components.StreakCard
 import com.varshith.consistly.viewmodels.StreakViewModel
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
+    ExperimentalAnimationApi::class
+)
 @Composable
 fun HomeScreen(
     viewModel: StreakViewModel,
     onAddStreak: () -> Unit,
     onStreakClick: (String) -> Unit
 ) {
+    // State management
     val streaks by viewModel.streaks.collectAsState()
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val scope = rememberCoroutineScope()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val lazyListState = rememberLazyListState()
 
-    // Derived state to check if list is scrolled
+    // Optimized scroll state calculation with suspension
     val isScrolled by remember {
-        derivedStateOf { lazyListState.firstVisibleItemIndex > 0 }
+        derivedStateOf {
+            lazyListState.firstVisibleItemIndex > 0 || lazyListState.firstVisibleItemScrollOffset > 0
+        }
     }
 
+    // Initial loading state
+    var isInitialLoad by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        isInitialLoad = false
+    }
+
+    // Content fade-in animation
+    val contentAlpha by animateFloatAsState(
+        targetValue = if (isInitialLoad) 0f else 1f,
+        animationSpec = tween(durationMillis = 500),
+        label = "Content Fade"
+    )
+
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            .graphicsLayer { alpha = contentAlpha },
         topBar = {
             LargeTopAppBar(
                 title = {
                     AnimatedContent(
                         targetState = isScrolled,
+                        transitionSpec = {
+                            fadeIn(animationSpec = tween(300)) with
+                                    fadeOut(animationSpec = tween(300))
+                        },
                         label = "Title Animation"
                     ) { scrolled ->
-                        if (scrolled) {
+                        Column {
                             Text(
-                                text = "Consistly",
-                                style = MaterialTheme.typography.titleLarge
+                                text = if (scrolled) "Consistly" else "Your Consistency Journey",
+                                style = if (scrolled)
+                                    MaterialTheme.typography.titleLarge
+                                else
+                                    MaterialTheme.typography.headlineMedium.copy(
+                                        fontWeight = FontWeight.Bold
+                                    )
                             )
-                        } else {
-                            Text(
-                                text = "Your Consistency Journey",
-                                style = MaterialTheme.typography.headlineMedium.copy(
-                                    fontWeight = FontWeight.Bold
+                            if (!scrolled) {
+                                Text(
+                                    text = "Track your daily progress",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                                 )
-                            )
+                            }
                         }
                     }
                 },
                 colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surface
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)
                 ),
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
-
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_dashboard),
-                        contentDescription = "Dashboard",
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
+                    IconButton(
+                        onClick = { /* Dashboard action */ }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_dashboard),
+                            contentDescription = "Dashboard",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 }
             )
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = onAddStreak,
+                onClick = {
+                    scope.launch {
+                        // Smooth scroll to top when adding new streak
+                        lazyListState.animateScrollToItem(0)
+                        onAddStreak()
+                    }
+                },
                 icon = {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -102,61 +128,117 @@ fun HomeScreen(
                     )
                 },
                 text = { Text("New Streak") },
-                expanded = !isScrolled
+                expanded = !isScrolled,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
     ) { paddingValues ->
-        AnimatedVisibility(
-            visible = streaks.isEmpty(),
-            enter = fadeIn() + scaleIn(),
-            exit = fadeOut() + scaleOut()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
-            EmptyStateView(onAddStreak)
-        }
-
-        AnimatedVisibility(
-            visible = streaks.isNotEmpty(),
-            enter = fadeIn() + scaleIn(),
-            exit = fadeOut() + scaleOut()
-        ) {
-            LazyColumn(
-                state = lazyListState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(
-                    items = streaks,
-                    key = { it.id }
-                ) { streak ->
-                    StreakCard(
-                        streak = streak,
-                        modifier = Modifier
-                            .animateItemPlacement(
-                                animationSpec = spring(
-                                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                                    stiffness = Spring.StiffnessMediumLow
-                                )
-                            ),
-                        onCardClick = { onStreakClick(streak.id) },
-                        onLogDay = { viewModel.logStreakDay(streak.id) },
-                        onBreakStreak = { viewModel.breakStreak(streak.id) },
-                        onDeleteStreak = {
-                            // Add your delete logic here
-                            viewModel.deleteStreak(streak.id, streak.startDate, streak.endDate)
-                        },
-                        onEditStreak = {print("REached Edit")}
-                    )
-                }
-            }
+            CrossfadeContent(
+                targetState = streaks.isEmpty(),
+                onAddStreak = onAddStreak,
+                streaks = streaks,
+                lazyListState = lazyListState,
+                viewModel = viewModel,
+                onStreakClick = onStreakClick
+            )
         }
     }
 }
 
 @Composable
-fun EmptyStateView(onAddStreak: () -> Unit) {
+private fun CrossfadeContent(
+    targetState: Boolean,
+    onAddStreak: () -> Unit,
+    streaks: List<StreakEntity>,
+    lazyListState: LazyListState,
+    viewModel: StreakViewModel,
+    onStreakClick: (String) -> Unit
+) {
+    Crossfade(
+        targetState = targetState,
+        animationSpec = tween(durationMillis = 400),
+        label = "Content Crossfade"
+    ) { isEmpty ->
+        if (isEmpty) {
+            EmptyStateView(onAddStreak)
+        } else {
+            StreakList(
+                streaks = streaks,
+                lazyListState = lazyListState,
+                viewModel = viewModel,
+                onStreakClick = onStreakClick
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun StreakList(
+    streaks: List<StreakEntity>,
+    lazyListState: LazyListState,
+    viewModel: StreakViewModel,
+    onStreakClick: (String) -> Unit
+) {
+    LazyColumn(
+        state = lazyListState,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(
+            items = streaks,
+            key = { it.hashCode() }
+        ) { streak ->
+            StreakCard(
+                streak = streak,
+                modifier = Modifier
+                    .animateItemPlacement(
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        )
+                    )
+                    .graphicsLayer {
+                        // Add subtle scale animation on scroll
+                        val scroll = lazyListState.firstVisibleItemScrollOffset.toFloat()
+                        alpha = 1f - (scroll / 1000f).coerceIn(0f, 0.5f)
+                        scaleX = 1f - (scroll / 1000f).coerceIn(0f, 0.1f)
+                        scaleY = 1f - (scroll / 1000f).coerceIn(0f, 0.1f)
+                    },
+                onCardClick = { onStreakClick(streak.id) },
+                onLogDay = { viewModel.logStreakDay(streak.id) },
+                onBreakStreak = { viewModel.breakStreak(streak.id) },
+                onDeleteStreak = {
+                    viewModel.deleteStreak(streak.id, streak.startDate, streak.endDate)
+                },
+                onEditStreak = { /* Implement edit functionality */ }
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptyStateView(onAddStreak: () -> Unit) {
+    // Create animation values within the Composable context
+    val infiniteTransition = rememberInfiniteTransition(label = "Empty State Animation")
+    val offsetY by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 10f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "Floating Animation"
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -165,33 +247,94 @@ fun EmptyStateView(onAddStreak: () -> Unit) {
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier
+                .graphicsLayer {
+                    // Apply the animated offset
+                    translationY = offsetY
+                }
         ) {
+            // Create a pulsing effect for the icon
+            val scale by infiniteTransition.animateFloat(
+                initialValue = 1f,
+                targetValue = 1.05f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(1500, easing = FastOutSlowInEasing),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "Scale Animation"
+            )
+
             Icon(
                 imageVector = Icons.Default.Check,
                 contentDescription = "Empty Streak",
                 modifier = Modifier
                     .size(100.dp)
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                    }
                     .clip(MaterialTheme.shapes.large)
                     .background(MaterialTheme.colorScheme.primaryContainer)
                     .padding(24.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
+
+            // Animate the text appearance
+            val textAlpha by infiniteTransition.animateFloat(
+                initialValue = 0.7f,
+                targetValue = 1f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(1500, easing = FastOutSlowInEasing),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "Text Alpha Animation"
+            )
+
             Text(
-                text = "No streaks yet",
+                text = "Start Your Journey",
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.graphicsLayer { alpha = textAlpha }
             )
+
             Text(
-                text = "Start your consistency journey now!",
+                text = "Create your first streak and begin building habits",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                modifier = Modifier.graphicsLayer { alpha = textAlpha }
             )
+
+            // Add a slight bounce effect to the button
+            val buttonScale by remember {
+                mutableStateOf(Animatable(1f))
+            }
+
+            LaunchedEffect(Unit) {
+                // Create a subtle continuous bounce effect
+                while (true) {
+                    buttonScale.animateTo(
+                        targetValue = 1.02f,
+                        animationSpec = tween(1000, easing = FastOutSlowInEasing)
+                    )
+                    buttonScale.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(1000, easing = FastOutSlowInEasing)
+                    )
+                }
+            }
+
             Button(
                 onClick = onAddStreak,
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .graphicsLayer {
+                        scaleX = buttonScale.value
+                        scaleY = buttonScale.value
+                    },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add Streak")

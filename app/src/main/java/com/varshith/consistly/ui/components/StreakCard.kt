@@ -388,7 +388,10 @@ fun StreakCard(
                 onDismiss = { bottomSheetVisible = false },
                 onDetails = onCardClick,
                 onDelete = { showDeleteDialog = true },
-                streak = streak
+                streak = streak,
+                onEdit = {print("Edit")},
+                onShare = {print("Share")},
+                onArchive = {print("Archive")}
             )
         },
         enableDismissFromEndToStart = true,

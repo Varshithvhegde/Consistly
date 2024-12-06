@@ -32,6 +32,7 @@ import com.varshith.consistly.R
 import com.varshith.consistly.data.models.StreakEntity
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlin.math.abs
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -41,6 +42,7 @@ fun StreakCard(
     onBreakStreak: () -> Unit,
     onCardClick: () -> Unit,
     onDeleteStreak: () -> Unit,
+    onEditStreak: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -55,6 +57,11 @@ fun StreakCard(
                     showDeleteDialog = true
                     false
                 }
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onEditStreak()
+                    false
+                }
                 else -> false
             }
         }
@@ -62,9 +69,18 @@ fun StreakCard(
 
     // Premium animations
     val swipeProgress = dismissState.progress
+    println("SwipeProgress : ${swipeProgress.toString()}")
     val scale by animateFloatAsState(
         targetValue = 1f - (swipeProgress * 0.05f),
         animationSpec = spring(stiffness = Spring.StiffnessLow)
+    )
+
+    val actionIconScale by animateFloatAsState(
+        targetValue = lerp(0.8f, 1.2f, abs(swipeProgress)),
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        )
     )
 
     val deleteIconScale by animateFloatAsState(
@@ -86,10 +102,7 @@ fun StreakCard(
             hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         }
     }
-
-
     val dateFormatter = remember { DateTimeFormatter.ofPattern("MMM d, yyyy") }
-
     DeleteConfirmationDialog(
         visible = showDeleteDialog,
         onDismiss = { showDeleteDialog = false },
@@ -103,52 +116,76 @@ fun StreakCard(
     SwipeToDismissBox(
         state = dismissState,
         backgroundContent = {
+            val isEndToStart = dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart
             Box(
                 Modifier
                     .fillMaxSize()
                     .padding(horizontal = 16.dp, vertical = 8.dp)
                     .clip(RoundedCornerShape(24.dp))
                     .background(
-                        Brush.horizontalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.errorContainer,
-                                MaterialTheme.colorScheme.error
-                            ),
-                            startX = 0f,
-                            endX = swipeOffset * 3
-                        )
+                        if (isEndToStart) {
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.errorContainer,
+                                    MaterialTheme.colorScheme.error
+                                ),
+                                startX = 0f,
+                                endX = swipeOffset * 3
+                            )
+                        } else {
+                            Brush.horizontalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.primaryContainer
+                                ),
+                                startX = swipeOffset * 3,
+                                endX = 0f
+                            )
+                        }
                     ),
-                contentAlignment = Alignment.CenterEnd
+                contentAlignment = if (isEndToStart) Alignment.CenterEnd else Alignment.CenterStart
             ) {
-                Row(
-                    modifier = Modifier
-                        .padding(end = 32.dp)
-                        .graphicsLayer {
-                            translationX = -swipeOffset
-                            scaleX = deleteIconScale
-                            scaleY = deleteIconScale
-                        },
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = "Delete",
-                        modifier = Modifier.size(28.dp),
-                        tint = Color.White
-                    )
-
-                    AnimatedVisibility(
-                        visible = swipeProgress > 0.5f,
-                        enter = fadeIn() + expandHorizontally(),
-                        exit = fadeOut() + shrinkHorizontally()
+                if (isEndToStart) {
+                    // Delete action
+                    Row(
+                        modifier = Modifier
+                            .padding(end = 32.dp)
+                            .graphicsLayer {
+                                translationX = -swipeOffset
+                                scaleX = actionIconScale
+                                scaleY = actionIconScale
+                            },
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            "Delete Streak",
-                            color = Color.White,
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            modifier = Modifier.size(28.dp),
+                            tint = Color.White
                         )
+                        AnimatedVisibilityText("Delete Streak", swipeProgress)
+                    }
+                } else {
+                    // Edit action
+                    Row(
+                        modifier = Modifier
+                            .padding(start = 32.dp)
+                            .graphicsLayer {
+                                translationX = -swipeOffset
+                                scaleX = actionIconScale
+                                scaleY = actionIconScale
+                            },
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = "Edit",
+                            modifier = Modifier.size(28.dp),
+                            tint = Color.White
+                        )
+                        AnimatedVisibilityText("Edit Streak", swipeProgress)
                     }
                 }
             }
@@ -395,7 +432,7 @@ fun StreakCard(
             )
         },
         enableDismissFromEndToStart = true,
-        enableDismissFromStartToEnd = false
+        enableDismissFromStartToEnd = true
     )
 }
 
@@ -530,4 +567,23 @@ private fun ModernStatCard(
             )
         }
     }
+}
+
+@Composable
+private fun AnimatedVisibilityText(text: String, swipeProgress: Float) {
+    val alpha by animateFloatAsState(
+        targetValue = if (abs(swipeProgress) > 0.2f) 1f else 0f,
+        animationSpec = tween(durationMillis = 200)
+    )
+
+    Text(
+        text,
+        color = Color.White,
+        style = MaterialTheme.typography.labelLarge,
+        fontWeight = FontWeight.SemiBold,
+        modifier = Modifier.graphicsLayer {
+            this.alpha = alpha
+            translationX = (1f - alpha) * if (swipeProgress < 0) -50f else 50f
+        }
+    )
 }

@@ -145,8 +145,9 @@ fun HomeScreen(
                         onBreakStreak = { viewModel.breakStreak(streak.id) },
                         onDeleteStreak = {
                             // Add your delete logic here
-                            viewModel.deleteStreak(streak.id,streak.startDate,streak.endDate)
-                        }
+                            viewModel.deleteStreak(streak.id, streak.startDate, streak.endDate)
+                        },
+                        onEditStreak = {print("REached Edit")}
                     )
                 }
             }

@@ -102,6 +102,10 @@ class ReminderNotificationService(private val context: Context) {
                 triggerMillis,
                 pendingIntent
             )
+            alarmManager.setAlarmClock(
+                AlarmManager.AlarmClockInfo(triggerMillis, pendingIntent),
+                pendingIntent
+            )
 
             scheduledDate = scheduledDate.plusDays(1)
         }

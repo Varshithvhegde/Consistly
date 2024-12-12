@@ -205,14 +205,7 @@ private fun StreakList(
                             dampingRatio = Spring.DampingRatioMediumBouncy,
                             stiffness = Spring.StiffnessLow
                         )
-                    )
-                    .graphicsLayer {
-                        // Add subtle scale animation on scroll
-                        val scroll = lazyListState.firstVisibleItemScrollOffset.toFloat()
-                        alpha = 1f - (scroll / 1000f).coerceIn(0f, 0.5f)
-                        scaleX = 1f - (scroll / 1000f).coerceIn(0f, 0.1f)
-                        scaleY = 1f - (scroll / 1000f).coerceIn(0f, 0.1f)
-                    },
+                    ),
                 onCardClick = { onStreakClick(streak.id) },
                 onLogDay = { viewModel.logStreakDay(streak.id) },
                 onBreakStreak = { viewModel.breakStreak(streak.id) },

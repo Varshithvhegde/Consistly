@@ -67,17 +67,6 @@ class MainActivity : ComponentActivity() {
 //            notificationService.showWelcomeNotification()
             streakReminderService.scheduleDaily()
         }
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            val powerManager = getSystemService(PowerManager::class.java)
-//            val packageName = packageName
-//            if (!powerManager.isIgnoringBatteryOptimizations(packageName)) {
-//                Intent().also { intent ->
-//                    intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-//                    intent.data = Uri.parse("package:$packageName")
-//                    startActivity(intent)
-//                }
-//            }
-//        }
 
         // Initialize Database and ViewModel
         val database = ConsistlyDatabase.getDatabase(applicationContext)
